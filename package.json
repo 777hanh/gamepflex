@@ -1,0 +1,38 @@
+{
+  "name": "gameplex-nuxt",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@nuxt/eslint": "^1.9.0",
+    "@nuxt/image": "^1.11.0",
+    "@nuxt/ui": "^4.0.0",
+    "@pinia/nuxt": "^0.11.2",
+    "@tabler/icons": "^3.35.0",
+    "@vueuse/core": "^11.2.0",
+    "@vueuse/nuxt": "^11.2.0",
+    "aos": "^2.3.4",
+    "axios": "^1.12.2",
+    "eslint": "^9.36.0",
+    "gsap": "^3.13.0",
+    "magnific-popup": "^1.2.0",
+    "nuxt": "^4.1.1",
+    "pinia": "^3.0.3",
+    "swiper": "^12.0.2",
+    "typescript": "^5.9.2",
+    "vue": "^3.5.21",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@types/aos": "^3.0.4",
+    "@types/node": "^22.10.2"
+  }
+}
