@@ -1,6 +1,6 @@
 <template>
     <header
-        class="app-header relative w-full"
+        class="app-header relative sticky! z-50 w-full"
         :class="{ 'is-scrolled': isScrolled }"
         data-header
     >
@@ -14,7 +14,7 @@
                     <UButton
                         variant="ghost"
                         icon="i-tabler-menu-2"
-                        class="lg:hidden"
+                        class="burger-menu flex lg:hidden!"
                         @click="isMenuOpen = !isMenuOpen"
                     />
                     <NuxtLink to="/" class="flex items-center gap-2">
@@ -477,6 +477,10 @@
         box-shadow: 0 4px 10px -3px rgba(0, 0, 0, 0.5);
     }
 
+    .burger-menu {
+        display: flex;
+    }
+
     /* Mobile nav overlay style improvement */
     @media (max-width: 991.98px) {
         .main-nav {
@@ -487,6 +491,10 @@
         }
         .main-nav ul {
             flex-wrap: wrap;
+        }
+
+        .burger-menu {
+            display: none;
         }
     }
 
