@@ -1,5 +1,9 @@
 /* GamePlex Main Styles */
 
+body {
+    padding-right: 0 !important;
+}
+
 html,
 body {
     font-family: 'Poppins', sans-serif;
