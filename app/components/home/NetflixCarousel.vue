@@ -180,6 +180,8 @@
 <style scoped>
     /* Minimal styles for window layout */
     .nf-window {
+        width: 100%;
+        background-color: red;
         display: flex;
         gap: 8px;
         justify-content: center;

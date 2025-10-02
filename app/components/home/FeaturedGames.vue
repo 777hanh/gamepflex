@@ -1,158 +1,110 @@
 <template>
-    <section id="featured-games" class="featured-games-section">
-        <div class="container">
-            <div class="section-head">
-                <h2 class="section-title" data-aos="fade-right">
-                    Featured Games
-                </h2>
-                <div
-                    class="nav-buttons"
-                    data-aos="fade-left"
-                    data-aos-delay="120"
+    <section class="nf-fg">
+        <div class="nf-fg-head">
+            <h2 class="nf-fg-title">Featured Games</h2>
+            <div class="nf-fg-controls">
+                <button
+                    class="nf-btn prev"
+                    :disabled="!swiperRef"
+                    @click="swiperRef?.slidePrev()"
                 >
-                    <button
-                        class="fg-nav-btn prev magnetic"
-                        @click="swiper?.slidePrev()"
-                    >
-                        <i class="i-tabler-chevron-left" />
-                    </button>
-                    <button
-                        class="fg-nav-btn next magnetic"
-                        @click="swiper?.slideNext()"
-                    >
-                        <i class="i-tabler-chevron-right" />
-                    </button>
-                </div>
+                    <i class="i-tabler-chevron-left" />
+                </button>
+                <button
+                    class="nf-btn next"
+                    :disabled="!swiperRef"
+                    @click="swiperRef?.slideNext()"
+                >
+                    <i class="i-tabler-chevron-right" />
+                </button>
             </div>
-
-            <div
-                class="featured-games-wrapper"
-                data-aos="fade-up"
-                data-aos-delay="60"
+        </div>
+        <div v-if="ready && windows.length" class="nf-fg-wrapper">
+            <component
+                :is="SwiperCmp"
+                class="nf-fg-swiper"
+                :modules="modules"
+                :loop="loopEnabled"
+                :slides-per-view="1"
+                :slides-per-group="1"
+                :space-between="0"
+                :centered-slides="false"
+                :speed="600"
+                :autoplay="autoplayOptions"
+                @swiper="onInit"
+                @slide-change="onSlideChange"
             >
                 <component
-                    v-if="ready && SwiperComponent && internalGames.length > 0"
-                    :is="SwiperComponent"
-                    :modules="modules"
-                    :loop="internalGames.length > 1"
-                    :speed="520"
-                    :centered-slides="true"
-                    :slides-per-view="slidesPerView"
-                    :space-between="spaceBetween"
-                    :breakpoints="breakpoints"
-                    :grab-cursor="true"
-                    :autoplay="autoplayCfg"
-                    :virtual="undefined"
-                    @swiper="onSwiper"
-                    @slide-change="onSlideChange"
-                    @progress="onProgress"
-                    class="fg-swiper simple-center"
+                    v-for="(win, w) in windows"
+                    :is="SwiperSlideCmp"
+                    :key="'fg-window-' + w"
+                    class="nf-window-slide"
                 >
-                    <component
-                        v-for="(g, i) in internalGames"
-                        :is="SwiperSlideComponent"
-                        :key="'fg-' + (g.id || i)"
-                        class="fg-slide"
-                        :class="{ 'is-active': i === realActiveIndex }"
-                    >
+                    <div class="nf-window" :style="{ '--cols': perWindow }">
                         <div
-                            class="featured-game-card magnetic-depth"
-                            data-depth-rot="16"
-                            data-depth-trans="14"
-                            data-magnetic-strength="1.05"
+                            v-for="(g, i) in win"
+                            :key="'fg-item-' + (g.id || i)"
+                            class="nf-card"
                         >
-                            <div class="fg-card-inner magnetic-inner">
-                                <div class="fg-media">
-                                    <NuxtImg
-                                        :src="g.image"
-                                        :alt="g.name"
-                                        format="webp"
-                                        width="560"
-                                        height="340"
-                                        loading="lazy"
-                                        class="fg-img"
-                                    />
-                                    <div class="fg-date-badge">
-                                        <i
-                                            class="i-tabler-calendar-time me-1"
-                                        />{{ g.date || '15.02.2022' }}
-                                    </div>
-                                    <div class="fg-status-pill">
-                                        <span class="dot"></span
-                                        >{{ g.status || 'Playing' }}
-                                    </div>
-                                </div>
-                                <h3 class="fg-title" :title="g.name">
-                                    {{ g.name }}
-                                </h3>
-                                <div class="fg-meta">
-                                    <div class="fg-meta-group">
-                                        <span class="coin bitcoin"
-                                            ><i
-                                                class="i-tabler-currency-bitcoin"
-                                            />{{ g.coinA || 75 }}</span
-                                        >
-                                        <span class="sep" />
-                                        <span class="coin token"
-                                            ><i class="i-tabler-coin" />{{
-                                                g.coinB || 54
-                                            }}</span
-                                        >
-                                    </div>
-                                    <div class="fg-price">
-                                        {{ g.price || '$49.97' }}
-                                    </div>
+                            <div class="nf-thumb">
+                                <NuxtImg
+                                    :src="g.image"
+                                    :alt="g.name"
+                                    format="webp"
+                                    loading="lazy"
+                                    width="400"
+                                    height="225"
+                                />
+                                <div class="nf-badges">
+                                    <span class="b-status" v-if="g.status">{{
+                                        g.status
+                                    }}</span>
+                                    <span class="b-date" v-if="g.date">{{
+                                        g.date
+                                    }}</span>
                                 </div>
                             </div>
+                            <h3 class="nf-name" :title="g.name">
+                                {{ g.name }}
+                            </h3>
+                            <div class="nf-meta">
+                                <span class="coin a"
+                                    ><i class="i-tabler-currency-bitcoin" />{{
+                                        g.coinA || 75
+                                    }}</span
+                                >
+                                <span class="coin b"
+                                    ><i class="i-tabler-coin" />{{
+                                        g.coinB || 54
+                                    }}</span
+                                >
+                                <span class="price">{{
+                                    g.price || '$49.97'
+                                }}</span>
+                            </div>
                         </div>
-                    </component>
-                </component>
-                <div v-else class="fg-loading">
-                    <template v-if="!ready">
-                        <span class="spinner" /> Đang tải slider...
-                    </template>
-                    <div v-else class="fg-skeleton-wrap">
-                        <div
-                            v-for="n in 3"
-                            :key="'skel-' + n"
-                            class="fg-skel shimmer"
-                        />
-                        <p class="small text-muted mt-4 mb-0">
-                            Chưa có dữ liệu hiển thị
-                        </p>
                     </div>
-                </div>
-            </div>
-
-            <div class="fg-pagination-dots" aria-hidden="true">
-                <span
-                    v-for="(g, i) in internalGames"
-                    :key="'dot-' + (g.id || i)"
-                    class="dot"
-                    :class="{ active: i === realActiveIndex }"
-                    @click="goTo(i)"
-                />
-            </div>
-            <!-- <div class="fg-autoplay-progress" v-if="ready">
-                <div
-                    class="bar"
-                    :style="{ '--p': (progress * 100).toFixed(2) + '%' }"
-                ></div>
-            </div> -->
+                </component>
+            </component>
+        </div>
+        <div v-else class="nf-empty">Loading...</div>
+        <div class="nf-dots" v-if="loopEnabled">
+            <span
+                v-for="(w, idx) in windows"
+                :key="'dot-' + idx"
+                class="dot"
+                :class="{ active: idx === activeWindow }"
+                @click="jumpToWindow(idx)"
+            />
         </div>
     </section>
 </template>
 
 <script setup lang="ts">
-    import { ref, onMounted, shallowRef, watch, nextTick } from 'vue';
-    // Lazy load Swiper only on client to create a separate chunk
-    const SwiperComponent = shallowRef<any>(null);
-    const SwiperSlideComponent = shallowRef<any>(null);
-    const modules = ref<any[]>([]);
-    const ready = ref(false);
+    import { ref, computed, shallowRef, onMounted, watch } from 'vue';
 
     export interface FeaturedGame {
-        id: number | string;
+        id: string | number;
         name: string;
         image: string;
         status?: string;
@@ -161,647 +113,388 @@
         coinB?: number;
         price?: string;
     }
+
     const props = defineProps<{
         games: FeaturedGame[];
-        /** Enable internal auto load trigger when nearing the end */
-        autoLoad?: boolean;
-        /** How many items from the end before triggering load (default 4) */
-        bufferThreshold?: number;
-        /** Extra lead (in items) for forward (next) direction so data có sẵn trước khi chạm cuối (default 2) */
-        forwardLead?: number;
-        /** Debounce time between load triggers (ms, default 450) */
-        debounceMs?: number;
-        /** Optional async loader returning new games; if absent an event will be emitted */
+        perSlide?: number;
+        autoplay?: boolean;
+        autoplayDelay?: number;
         loader?: () => Promise<FeaturedGame[]>;
-        /** Số slide nhìn trước (look ahead) khi đi tới để tính remaining sớm hơn (default 1) */
-        lookAhead?: number;
+        bufferThreshold?: number;
     }>();
     const emit = defineEmits<{ (e: 'load-more'): void }>();
 
-    // Internal mutable list to allow fast append / prepend without forcing full re-render of parent
-    const internalGames = ref<FeaturedGame[]>(
-        Array.isArray(props.games) ? [...props.games] : []
-    );
-    let prevLen = internalGames.value.length;
-    const loadingMore = ref(false);
-    let lastLoadTs = 0;
+    // Base list (reactive to parent changes)
+    const list = ref<FeaturedGame[]>([...props.games]);
     watch(
         () => props.games,
-        (val) => {
-            if (!Array.isArray(val)) return;
-            const wasEmpty = internalGames.value.length === 0;
-            internalGames.value = [...val];
-            // If new items arrived, clear loading flag
-            if (internalGames.value.length > prevLen) {
-                loadingMore.value = false;
-            }
-            prevLen = internalGames.value.length;
-            nextTick(() => {
-                if (swiper.value) {
-                    swiper.value.update?.();
-                    if (wasEmpty && internalGames.value.length)
-                        swiper.value.slideToLoop(0, 0);
-                }
-                // After updates, re-check buffer in case we are still close to the tail
-                checkBuffer();
-            });
+        (v) => {
+            if (Array.isArray(v)) list.value = [...v];
         }
     );
 
-    const swiper = ref<any>(null);
-    const realActiveIndex = ref(0);
-    const autoplayCfg = {
-        delay: 3000,
-        disableOnInteraction: false,
-        pauseOnMouseEnter: true
-    };
-    // Simple layout (no coverflow) => using scale/opacity via CSS on active/prev/next
-    const slidesPerView = 'auto';
-    const spaceBetween = 34;
-    const progress = ref(0); // autoplay ratio 0..1
-    const hashSync = true; // enable route hash sync
-    const lastProgressCheck = ref(0);
+    // Responsive items per window (can override via perSlide)
+    const vw = ref<number>(1200);
+    if (import.meta.client) {
+        vw.value = window.innerWidth;
+        window.addEventListener('resize', () => (vw.value = window.innerWidth));
+    }
+    const perWindow = computed(() => {
+        if (typeof props.perSlide === 'number' && props.perSlide > 0)
+            return props.perSlide;
+        const w = vw.value;
+        if (w < 560) return 2;
+        if (w < 820) return 3;
+        if (w < 1180) return 4;
+        return 5;
+    });
 
-    const breakpoints = {
-        520: { slidesPerView: 1, spaceBetween: 0 },
-        680: { slidesPerView: 2, spaceBetween: 0 },
-        900: { slidesPerView: 3, spaceBetween: 0 },
-        1180: { slidesPerView: 3, spaceBetween: 0 },
-        1480: { slidesPerView: 5, spaceBetween: 0 }
-    };
-
-    function onSwiper(sw: any) {
-        swiper.value = sw;
-        updateCenter(sw);
-    }
-    function onSlideChange(sw: any) {
-        updateCenter(sw);
-        progress.value = 0; // reset progress bar
-        if (hashSync) updateHash();
-        prefetchNext();
-        checkBuffer(sw?.swipeDirection || undefined);
-    }
-    function updateCenter(sw: any) {
-        const len = internalGames.value.length || 1;
-        realActiveIndex.value = sw.realIndex % len;
-    }
-    function updateHash() {
-        if (typeof window === 'undefined') return;
-        const id = internalGames.value[realActiveIndex.value]?.id;
-        if (!id) return;
-        const newHash = `game-${id}`;
-        if (window.location.hash !== '#' + newHash) {
-            history.replaceState(null, '', `#${newHash}`);
+    // Build window slides stepping by perWindow (Netflix style) 12345 -> 67891 -> ...
+    const windows = computed(() => {
+        const arr = list.value;
+        const W = perWindow.value;
+        const L = arr.length;
+        if (L === 0) return [] as FeaturedGame[][];
+        if (W >= L) return [arr];
+        const result: FeaturedGame[][] = [];
+        let start = 0;
+        const seen = new Set<number>();
+        while (!seen.has(start)) {
+            seen.add(start);
+            const win: FeaturedGame[] = [];
+            for (let i = 0; i < W; i++) {
+                const item = arr[(start + i) % L];
+                if (item) win.push(item);
+            }
+            result.push(win);
+            start = (start + W) % L;
         }
+        return result;
+    });
+
+    // Swiper lazy import
+    const SwiperCmp = shallowRef<any>(null);
+    const SwiperSlideCmp = shallowRef<any>(null);
+    const modules = ref<any[]>([]);
+    const ready = ref(false);
+    const swiperRef = ref<any>(null);
+    const activeWindow = ref(0);
+    const loopEnabled = computed(() => windows.value.length > 1);
+
+    // Autoplay options
+    const autoplayOptions = computed(() =>
+        props.autoplay === true
+            ? {
+                  delay: props.autoplayDelay ?? 4000,
+                  disableOnInteraction: false,
+                  pauseOnMouseEnter: true
+              }
+            : false
+    );
+
+    function onInit(sw: any) {
+        swiperRef.value = sw;
     }
+    function onSlideChange() {
+        if (!swiperRef.value) return;
+        const real = swiperRef.value.realIndex || 0;
+        activeWindow.value = real % windows.value.length;
+        maybeLoadMore();
+        prefetchNext();
+    }
+    function jumpToWindow(idx: number) {
+        if (!swiperRef.value) return;
+        swiperRef.value.slideToLoop(idx, 600, true);
+    }
+
+    // Prefetch first image of next window
     function prefetchNext() {
         if (!import.meta.client) return;
-        const len = internalGames.value.length;
-        if (!len) return;
-        const nextIndex = (realActiveIndex.value + 1) % len;
-        const next = internalGames.value[nextIndex];
+        if (!windows.value.length) return;
+        const nextWin =
+            windows.value[(activeWindow.value + 1) % windows.value.length];
+        const next = nextWin?.[0];
         if (!next?.image) return;
-        const linkId = 'prefetch-game-' + next.id;
-        if (document.getElementById(linkId)) return;
+        const id = 'prefetch-win-' + next.id;
+        if (document.getElementById(id)) return;
         const l = document.createElement('link');
-        l.id = linkId;
+        l.id = id;
         l.rel = 'prefetch';
         l.as = 'image';
         l.href = next.image;
         document.head.appendChild(l);
     }
-    function goTo(i: number) {
-        if (swiper.value) {
-            swiper.value.slideToLoop(i);
-        }
-    }
 
-    // Liên tục kiểm tra trong lúc người dùng đang kéo (vuốt sang trái để đi NEXT)
-    function onProgress(sw: any) {
-        if (!props.autoLoad) return;
+    let loading = false;
+    let last = 0;
+    async function maybeLoadMore() {
+        const threshold = props.bufferThreshold ?? 2;
+        const total = list.value.length;
+        const W = perWindow.value;
+        const approxPos = activeWindow.value * W;
+        const remaining = total - approxPos - W;
+        if (remaining > threshold) return;
         const now = performance.now();
-        // throttle để tránh spam
-        if (now - lastProgressCheck.value < 120) return;
-        lastProgressCheck.value = now;
-        try {
-            // Khi diff < 0 (LTR) nghĩa là user kéo sang trái => đi tới slide tiếp theo
-            const movingNext =
-                sw?.touches &&
-                typeof sw.touches.diff === 'number' &&
-                sw.touches.diff < 0;
-            if (movingNext) {
-                checkBuffer('next');
-            }
-        } catch {
-            // silent: defensive
-        }
-    }
-
-    function triggerLoadMore() {
-        if (loadingMore.value) return;
-        loadingMore.value = true;
-        lastLoadTs = performance.now();
+        if (loading || now - last < 500) return;
+        last = now;
+        loading = true;
         if (typeof props.loader === 'function') {
-            // Use provided async loader
-            Promise.resolve(props.loader())
-                .then((res) => {
-                    if (Array.isArray(res) && res.length) {
-                        appendGames(res);
-                    } else {
-                        // Nothing returned => mark as not loading so future retry can occur
-                        loadingMore.value = false;
-                    }
-                })
-                .catch(() => {
-                    loadingMore.value = false;
-                });
-        } else {
-            // Fallback: emit event for parent to handle
-            emit('load-more');
-        }
-    }
-
-    interface BufferOptions {
-        predictive?: boolean;
-    }
-    function checkBuffer(direction?: string, opts: BufferOptions = {}) {
-        if (!props.autoLoad) return;
-        const base = props.bufferThreshold ?? 4;
-        const forwardLead = props.forwardLead ?? 2;
-        const lookAhead = props.lookAhead ?? 1;
-        const total = internalGames.value.length;
-        if (!total) return;
-        const usePredict = opts.predictive || direction === 'next';
-        const logicalPosition = usePredict
-            ? realActiveIndex.value + 1 + lookAhead
-            : realActiveIndex.value + 1;
-        const remaining = total - logicalPosition;
-        const effectiveThreshold = usePredict ? base + forwardLead : base;
-        if (remaining <= effectiveThreshold) {
-            const now = performance.now();
-            const debounce = props.debounceMs ?? 450;
-            if (now - lastLoadTs >= debounce) {
-                triggerLoadMore();
+            try {
+                const more = await props.loader();
+                if (Array.isArray(more) && more.length) {
+                    list.value.push(...more);
+                    swiperRef.value?.updateSlides();
+                }
+            } finally {
+                loading = false;
             }
+        } else {
+            emit('load-more');
+            loading = false;
         }
     }
 
     onMounted(async () => {
         if (!import.meta.client) return;
-        const [{ Swiper: SwiperCmp, SwiperSlide: SlideCmp }, swiperMod] =
-            await Promise.all([import('swiper/vue'), import('swiper/modules')]);
-        SwiperComponent.value = SwiperCmp;
-        SwiperSlideComponent.value = SlideCmp;
-        const { Navigation, Autoplay } = swiperMod as any;
-        modules.value = [Navigation, Autoplay];
-        // @ts-expect-error css side effect
+        const [{ Swiper, SwiperSlide }, mod] = await Promise.all([
+            import('swiper/vue'),
+            import('swiper/modules')
+        ]);
+        SwiperCmp.value = Swiper;
+        SwiperSlideCmp.value = SwiperSlide;
+        const { Navigation, Autoplay } = mod as any;
+        modules.value = [Navigation, Autoplay]; // @ts-expect-error css side effect
         await import('swiper/css');
-        // @ts-expect-error css side effect
-        await import('swiper/css/effect-coverflow');
         ready.value = true;
-        // initial hash parse
-        if (hashSync && location.hash.startsWith('#game-')) {
-            const targetId = location.hash.replace('#game-', '');
-            const idx = props.games.findIndex((g) => String(g.id) === targetId);
-            if (idx >= 0) {
-                // delay until swiper instance ready
-                requestAnimationFrame(() => {
-                    if (swiper.value) swiper.value.slideToLoop(idx, 0);
-                });
-            }
-        }
-        prefetchNext();
-        // autoplay progress tracking
-        const step = () => {
-            if (swiper.value?.autoplay?.running) {
-                const delay = autoplayCfg.delay;
-                const time = swiper.value.autoplay.timeLeft
-                    ? delay - swiper.value.autoplay.timeLeft
-                    : 0;
-                progress.value = Math.min(1, Math.max(0, time / delay));
-            }
-            requestAnimationFrame(step);
-        };
-        requestAnimationFrame(step);
-        // Initial buffer check
-        checkBuffer('next');
-        // Prefill ngay nếu lúc vào đã thiếu buffer (chạy vài vòng tối đa 2 lần để tránh spam)
-        if (props.autoLoad) {
-            let attempts = 0;
-            const prefill = () => {
-                attempts++;
-                checkBuffer('next', { predictive: true });
-                if (attempts < 2 && !loadingMore.value) {
-                    const base = props.bufferThreshold ?? 4;
-                    const forwardLead = props.forwardLead ?? 2;
-                    const lookAhead = props.lookAhead ?? 1;
-                    const total = internalGames.value.length;
-                    const targetRemaining = base + forwardLead;
-                    const logicalPos = realActiveIndex.value + 1 + lookAhead;
-                    const remaining = total - logicalPos;
-                    if (remaining <= targetRemaining) {
-                        // Try again after micro delay if still low
-                        setTimeout(prefill, 120);
-                    }
-                }
-            };
-            prefill();
-            // Continuous predictive loop trong lúc kéo để không cần thả mới nạp
-            const predictiveLoop = () => {
-                if (swiper.value && !loadingMore.value) {
-                    checkBuffer('next', { predictive: true });
-                }
-                requestAnimationFrame(predictiveLoop);
-            };
-            requestAnimationFrame(predictiveLoop);
-        }
     });
 
-    // Virtual slides config (enable only if many slides for perf)
-    // removed virtual complexity for stability until slides > threshold and verified
-
-    // Exposed API for parent components to stream data efficiently
-    function rebuildLoop(preserveIndex = true) {
-        if (!swiper.value || !swiper.value.params.loop) return;
-        const current = realActiveIndex.value;
-        try {
-            swiper.value.loopDestroy();
-            swiper.value.updateSlides();
-            swiper.value.loopCreate();
-            swiper.value.updateSlidesClasses();
-            if (preserveIndex) swiper.value.slideToLoop(current, 0, false);
-        } catch {
-            /* silent */
-        }
-    }
-    function appendGames(list: FeaturedGame[]) {
-        if (!Array.isArray(list) || !list.length) return;
-        internalGames.value.push(...list);
-        nextTick(() => {
-            swiper.value?.update?.();
-            rebuildLoop();
-            checkBuffer();
-        });
-    }
-    function prependGames(list: FeaturedGame[]) {
-        if (!Array.isArray(list) || !list.length) return;
-        internalGames.value.unshift(...list);
-        nextTick(() => {
-            swiper.value?.update?.();
-            rebuildLoop();
-            const added = list.length;
-            if (swiper.value)
-                swiper.value.slideTo(swiper.value.activeIndex + added, 0);
-            checkBuffer();
-        });
-    }
-    defineExpose({ appendGames, prependGames });
+    defineExpose({ jumpToWindow });
 </script>
 
 <style scoped>
-    .featured-games-section {
+    .nf-fg {
+        padding: 70px 0 60px;
         position: relative;
-        padding: 80px 0 60px;
     }
-    .section-head {
+    .nf-fg-head {
         display: flex;
-        align-items: center;
         justify-content: space-between;
+        align-items: center;
         gap: 24px;
         margin-bottom: 28px;
     }
-    .section-title {
+    .nf-fg-title {
+        margin: 0;
         font-size: clamp(1.3rem, 2.1vw, 2.2rem);
         font-weight: 700;
-        letter-spacing: 0.5px;
         background: linear-gradient(92deg, #fff, #7ee7ff 45%, #19b4ff 70%);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
-        margin: 0;
     }
-    .nav-buttons {
+    .nf-fg-controls {
         display: flex;
         gap: 14px;
     }
-    .fg-nav-btn {
-        width: 54px;
-        height: 54px;
+    .nf-btn {
+        width: 52px;
+        height: 52px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.06);
-        backdrop-filter: blur(6px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.18);
         color: #fff;
+        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
-        cursor: pointer;
-        transition:
-            background 0.35s,
-            border-color 0.35s,
-            transform 0.35s;
+        font-size: 1.1rem;
+        transition: 0.35s;
     }
-    .fg-nav-btn:hover {
+    .nf-btn:hover:not(:disabled) {
         background: linear-gradient(140deg, #ff8c2b, #ff5d00);
         border-color: #ff8c2b;
         transform: translateY(-3px);
     }
-    .featured-games-wrapper {
+    .nf-btn:disabled {
+        opacity: 0.35;
+        cursor: default;
+    }
+    .nf-fg-wrapper {
         position: relative;
-        /* revert to block so Swiper's centeredSlides math stays correct */
     }
-    .fg-swiper {
-        padding: 14px 6px 66px;
+    .nf-fg-swiper {
         overflow: visible;
-        margin: 0 auto;
-        width: auto;
+        padding: 8px 2px 52px;
     }
-    /* simplified center style */
-    .fg-swiper.simple-center :deep(.swiper-slide) {
-        transition:
-            transform 0.55s cubic-bezier(0.22, 0.8, 0.3, 1),
-            opacity 0.55s;
-        opacity: 0.28;
-        transform: scale(0.72) translateY(12px);
+    .nf-window-slide {
+        display: flex;
+        width: 100%;
     }
-    .fg-swiper.simple-center :deep(.swiper-slide.swiper-slide-prev),
-    .fg-swiper.simple-center :deep(.swiper-slide.swiper-slide-next) {
-        opacity: 0.55;
-        transform: scale(0.82) translateY(6px);
-    }
-    .fg-swiper.simple-center :deep(.swiper-slide.swiper-slide-active) {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-        z-index: 2;
-    }
-    .fg-swiper.simple-center :deep(.swiper-wrapper) {
+    .nf-window {
+        --gap: 18px;
+        display: flex;
+        gap: var(--gap);
+        width: 100%;
+        justify-content: stretch;
         align-items: stretch;
     }
-    /* Ensure the active slide visually sits in the middle even after dynamic appends */
-    .fg-swiper :deep(.swiper-wrapper) {
-        justify-content: center; /* helps when slide widths < container */
-    }
-    .fg-slide {
-        width: clamp(260px, 40vw, 400px);
-        max-width: 80vw;
-        transition:
-            filter 0.6s,
-            box-shadow 0.6s;
-        filter: saturate(0.7) brightness(0.92);
-    }
-    .fg-slide.is-active {
-        filter: saturate(1) brightness(1.05);
-    }
-    .featured-game-card {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        border-radius: 34px;
-        background: linear-gradient(170deg, #181b20, #121417);
-        padding: 14px 14px 18px;
-        box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.55);
-        transition:
-            background 0.4s,
-            box-shadow 0.4s;
-        isolation: isolate;
-    }
-    .featured-game-card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        padding: 2px;
-        border-radius: inherit;
-        background: linear-gradient(130deg, #ff7d2f, #ff4800 35%, #ffce54 70%);
-        -webkit-mask:
-            linear-gradient(#000 0 0) content-box,
-            linear-gradient(#000 0 0);
-        mask:
-            linear-gradient(#000 0 0) content-box,
-            linear-gradient(#000 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        opacity: 0;
-        transition: opacity 0.5s;
-        pointer-events: none;
-    }
-    .fg-slide.is-active .featured-game-card::before {
-        opacity: 1;
-    }
-    .fg-card-inner {
+    .nf-card {
+        /* Each card takes equal share; remove max-width clamp so items stretch */
+        flex: 1 1 calc((100% - (var(--cols) - 1) * var(--gap)) / var(--cols));
+        background: linear-gradient(165deg, #181b20, #121417);
+        border-radius: 26px;
+        padding: 12px 12px 16px;
+        box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.55);
         display: flex;
         flex-direction: column;
-        height: 100%;
-    }
-    .fg-media {
         position: relative;
-        border-radius: 28px;
+        transition:
+            transform 0.45s cubic-bezier(0.22, 0.8, 0.3, 1),
+            box-shadow 0.45s;
+        min-width: 0; /* allow text truncation within flex */
+    }
+    .nf-card:hover {
+        transform: translateY(-6px) scale(1.04);
+        box-shadow: 0 14px 32px -10px rgba(0, 0, 0, 0.6);
+    }
+    .nf-thumb {
+        position: relative;
+        aspect-ratio: 16/9;
+        border-radius: 20px;
         overflow: hidden;
-        aspect-ratio: 16 / 9;
         background: #0d0f12;
     }
-    .fg-img {
+    .nf-thumb img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition:
-            transform 1s ease,
-            filter 1s ease;
-        transform: scale(1.04);
+        transition: transform 1s ease;
+        transform: scale(1.05);
     }
-    .fg-slide.is-active .fg-img {
-        transform: scale(1.08);
+    .nf-card:hover .nf-thumb img {
+        transform: scale(1.12);
     }
-    .fg-date-badge {
+    .nf-badges {
         position: absolute;
-        top: 10px;
-        right: 10px;
-        font-size: 0.72rem;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 10px 5px;
-        border-radius: 14px;
-        background: rgba(0, 0, 0, 0.55);
-        color: #fff;
-        backdrop-filter: blur(6px);
-        letter-spacing: 0.2px;
-    }
-    .fg-status-pill {
-        position: absolute;
-        left: 14px;
-        bottom: 14px;
-        font-size: 0.8rem;
-        font-weight: 500;
-        background: rgba(0, 0, 0, 0.55);
-        padding: 8px 22px 7px;
-        border-radius: 32px;
-        color: #fff;
-        border: 2px solid #5bff3d;
-        display: inline-flex;
+        inset: auto 8px 8px 8px;
+        display: flex;
+        justify-content: space-between;
         gap: 6px;
-        align-items: center;
-        backdrop-filter: blur(6px);
+        pointer-events: none;
+        font-size: 0.6rem;
     }
-    .fg-status-pill .dot {
-        width: 8px;
-        height: 8px;
-        background: #5bff3d;
-        border-radius: 50%;
-        box-shadow: 0 0 8px #5bff3d;
+    .b-status {
+        background: rgba(0, 0, 0, 0.55);
+        padding: 5px 10px 4px;
+        border-radius: 16px;
+        border: 1px solid #5bff3d;
+        color: #5bff3d;
+        font-weight: 600;
+        line-height: 1;
     }
-    .fg-title {
-        font-size: clamp(1rem, 0.95rem + 0.3vw, 1.18rem);
-        font-weight: 700;
-        line-height: 1.25;
+    .b-date {
+        background: rgba(0, 0, 0, 0.55);
+        padding: 5px 10px 4px;
+        border-radius: 14px;
         color: #fff;
-        margin: 18px 4px 12px;
-        min-height: 2.2em;
+        font-weight: 500;
+        line-height: 1;
+    }
+    .nf-name {
+        font-size: clamp(0.9rem, 0.85rem + 0.25vw, 1.05rem);
+        font-weight: 700;
+        margin: 14px 4px 10px;
+        color: #fff;
+        line-height: 1.2;
+        min-height: 2.1em;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-    .fg-meta {
+    .nf-meta {
         margin-top: auto;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 10px 6px 0;
-        font-size: 0.78rem;
-        font-weight: 500;
+        gap: 8px;
+        font-size: 0.64rem;
+        font-weight: 600;
         color: #d4dae3;
-    }
-    .fg-meta-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
     }
     .coin {
         display: inline-flex;
         align-items: center;
         gap: 4px;
         padding: 4px 8px 4px 6px;
-        border-radius: 28px;
+        border-radius: 20px;
         background: #1d2127;
-        color: #fff;
         line-height: 1;
-        font-weight: 600;
-        font-size: 0.7rem;
     }
-    .coin i {
-        font-size: 0.9rem;
-    }
-    .coin.bitcoin {
+    .coin.a {
         background: linear-gradient(140deg, #242017, #38240e);
         border: 1px solid #ff9b38;
         color: #ffba63;
     }
-    .coin.token {
+    .coin.b {
         background: linear-gradient(140deg, #12262a, #10313a);
         border: 1px solid #20cfff;
         color: #76e6ff;
     }
-    .sep {
-        width: 1px;
-        height: 18px;
-        background: linear-gradient(
-            to bottom,
-            transparent,
-            #3a424d 40%,
-            #3a424d 60%,
-            transparent
-        );
-    }
-    .fg-price {
-        padding: 5px 12px 5px;
+    .price {
+        margin-left: auto;
         background: #1c2026;
-        border-radius: 22px;
-        font-size: 0.7rem;
-        letter-spacing: 0.5px;
+        padding: 5px 10px 5px;
+        border-radius: 18px;
+        letter-spacing: 0.4px;
         color: #fff;
-        font-weight: 600;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
     }
-    .fg-slide:not(.is-active) .featured-game-card {
-        background: linear-gradient(180deg, #14171b, #101214);
-        box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.55);
-    }
-    .fg-pagination-dots {
+    .nf-dots {
         display: flex;
         justify-content: center;
         gap: 10px;
-        margin-top: -8px;
-        position: relative;
-        z-index: 2;
+        margin-top: -4px;
     }
-    .fg-pagination-dots .dot {
+    .nf-dots .dot {
         width: 10px;
         height: 10px;
         border-radius: 50%;
         background: linear-gradient(130deg, #2a2f35, #171b20);
-        position: relative;
-        transition:
-            background 0.4s,
-            transform 0.4s;
         cursor: pointer;
+        transition: 0.4s;
     }
-    .fg-pagination-dots .dot.active {
+    .nf-dots .dot.active {
         background: linear-gradient(120deg, #ff7f30, #ff4500);
         transform: scale(1.35);
         box-shadow: 0 0 0 4px rgba(255, 126, 48, 0.2);
     }
-    .fg-autoplay-progress {
-        position: relative;
-        height: 6px;
-        margin: 24px auto 0;
-        width: clamp(220px, 40%, 380px);
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 4px;
-        overflow: hidden;
+    .nf-empty {
+        text-align: center;
+        padding: 70px 0;
+        color: #88909b;
+        font-size: 0.85rem;
     }
-    .fg-autoplay-progress .bar {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(90deg, #ff7d2f, #ff4800);
-        width: var(--p);
-        transition: width 0.18s linear;
+    @media (max-width: 1180px) {
+        .nf-window {
+            --gap: 16px;
+        }
     }
-    .fg-loading {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 80px 0;
-        justify-content: center;
-        font-size: 0.9rem;
-        color: #9aa4b1;
-    }
-    .spinner {
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        border: 3px solid rgba(255, 255, 255, 0.18);
-        border-top-color: #ff7d2f;
-        animation: spin 0.85s linear infinite;
-    }
-    @keyframes spin {
-        to {
-            transform: rotate(360deg);
+    @media (max-width: 880px) {
+        .nf-window {
+            --gap: 14px;
         }
     }
     @media (max-width: 640px) {
-        .fg-nav-btn {
+        .nf-btn {
             width: 46px;
             height: 46px;
         }
-        .featured-game-card {
-            border-radius: 28px;
-            padding: 12px 12px 16px;
-        }
-        .fg-media {
+        .nf-card {
             border-radius: 22px;
+        }
+        .nf-thumb {
+            border-radius: 18px;
         }
     }
 </style>
