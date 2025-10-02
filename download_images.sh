@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# Create directories
+mkdir -p public/assets/img
+
+# Base URL
+BASE_URL="https://gameplex-final.vercel.app/gameplex-v1/assets/img"
+
+# List of all images needed
+images=(
+    "big-star.png"
+    "small-star.png" 
+    "award.png"
+    "bg-1.png"
+    "hero.png"
+    "avatar1.png"
+    "avatar2.png"
+    "avatar3.png"
+    "player1.png"
+    "player2.png"
+    "player3.png"
+    "player4.png"
+    "bitcoin.png"
+    "tether.png"
+    "slide-3d-1.png"
+    "slide-3d-2.png"
+    "slide-3d-3.png"
+    "slide-3d-4.png"
+    "slide-3d-5.png"
+    "slide-3d-6.png"
+    "slide-3d-7.png"
+    "game-x1.png"
+    "game-x2.png"
+    "game-x3.png"
+    "game-x4.png"
+    "game-x5.png"
+    "game-x6.png"
+    "game-x7.png"
+    "game-x8.png"
+    "game-x9.png"
+    "game-x10.png"
+    "team-logo1.png"
+    "team-logo2.png"
+    "team-logo3.png"
+    "team-logo4.png"
+    "team-logo5.png"
+    "team-logo6.png"
+    "team-logo7.png"
+    "team-logo8.png"
+    "team-logo9.png"
+    "team-banner.png"
+    "logo.png"
+    "logo2.png"
+    "metamask.png"
+    "walletconnect.png"
+    "fbanner.png"
+    "top-player-1.png"
+    "top-player-2.png"
+    "top-player-3.png"
+    "top-player-4.png"
+    "top-player-5.png"
+    "top-player-6.png"
+    "top-player-bg.png"
+    "tournament-1.png"
+    "tournament-2.png"
+    "tournament-3.png"
+    "tournament-4.png"
+    "tournament-5.png"
+    "tournament-6.png"
+    "signin-bg.png"
+    "signup-bg.png"
+    "error-bg.png"
+    "profile-bg.png"
+)
+
+# Download each image
+for img in "${images[@]}"; do
+    echo "Downloading $img..."
+    curl -f -o "public/assets/img/$img" "$BASE_URL/$img" || echo "Failed to download $img"
+done
+
+echo "Image download completed!"

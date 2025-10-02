@@ -1,0 +1,39 @@
+<template>
+  <div>
+    <!-- Error page section start -->
+    <section class="error-page pb-120 pt-120 mt-lg-0 mt-sm-15 mt-10">
+      <div class="container pt-120">
+        <div class="row justify-content-center">
+          <div class="col-lg-6">
+            <h1
+              class="hero-title display-one text-center tcn-1 cursor-scale growUp mb-lg-10 mb-6"
+            >
+              <span class="d-block">404</span>
+              <span class="d-block tcp-1">ERROR</span>
+            </h1>
+            <p class="hero-text text-center tcn-1 mb-lg-10 mb-6">
+              The page you are looking for does not exist.
+            </p>
+            <div class="text-center">
+              <NuxtLink to="/" class="claim-btn">Go Back Home</NuxtLink>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Error page section end -->
+  </div>
+</template>
+
+<script setup lang="ts">
+// SEO
+useHead({
+  title: "404 Error - GamePlex",
+  meta: [
+    {
+      name: "description",
+      content: "Page not found - GamePlex",
+    },
+  ],
+});
+</script>
