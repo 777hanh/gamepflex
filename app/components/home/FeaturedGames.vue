@@ -6,95 +6,97 @@
                 <button
                     class="nf-btn prev"
                     :disabled="!swiperRef"
-                    @click="swiperRef?.slidePrev()"
+                    @click="navPrevPage"
                 >
                     <i class="i-tabler-chevron-left" />
                 </button>
                 <button
                     class="nf-btn next"
                     :disabled="!swiperRef"
-                    @click="swiperRef?.slideNext()"
+                    @click="navNextPage"
                 >
                     <i class="i-tabler-chevron-right" />
                 </button>
             </div>
         </div>
-        <div v-if="ready && windows.length" class="nf-fg-wrapper">
+        <div v-if="ready && list.length" class="nf-fg-wrapper">
             <component
                 :is="SwiperCmp"
                 class="nf-fg-swiper"
                 :modules="modules"
-                :loop="loopEnabled"
-                :slides-per-view="1"
-                :slides-per-group="1"
-                :space-between="0"
-                :centered-slides="false"
-                :speed="600"
+                :loop="false"
+                :slides-per-view="perWindow"
+                :centered-slides="true"
+                :space-between="gap"
+                :speed="520"
+                grab-cursor
+                :style="{ '--cols': perWindow }"
                 :autoplay="autoplayOptions"
                 @swiper="onInit"
                 @slide-change="onSlideChange"
+                @set-translate="onRealtimeMove"
             >
                 <component
-                    v-for="(win, w) in windows"
+                    v-for="entry in repeatedList"
                     :is="SwiperSlideCmp"
-                    :key="'fg-window-' + w"
-                    class="nf-window-slide"
+                    :key="entry.key"
+                    class="nf-item-slide"
+                    :data-g-idx="entry.baseIndex"
                 >
-                    <div class="nf-window" :style="{ '--cols': perWindow }">
-                        <div
-                            v-for="(g, i) in win"
-                            :key="'fg-item-' + (g.id || i)"
-                            class="nf-card"
-                        >
-                            <div class="nf-thumb">
-                                <NuxtImg
-                                    :src="g.image"
-                                    :alt="g.name"
-                                    format="webp"
-                                    loading="lazy"
-                                    width="400"
-                                    height="225"
-                                />
-                                <div class="nf-badges">
-                                    <span class="b-status" v-if="g.status">{{
-                                        g.status
-                                    }}</span>
-                                    <span class="b-date" v-if="g.date">{{
-                                        g.date
-                                    }}</span>
-                                </div>
-                            </div>
-                            <h3 class="nf-name" :title="g.name">
-                                {{ g.name }}
-                            </h3>
-                            <div class="nf-meta">
-                                <span class="coin a"
-                                    ><i class="i-tabler-currency-bitcoin" />{{
-                                        g.coinA || 75
-                                    }}</span
+                    <div
+                        class="nf-card"
+                        :class="cardStateClass(entry.baseIndex)"
+                    >
+                        <div class="nf-thumb">
+                            <NuxtImg
+                                :src="entry.item.image"
+                                :alt="entry.item.name"
+                                format="webp"
+                                loading="lazy"
+                                width="400"
+                                height="225"
+                            />
+                            <div class="nf-badges">
+                                <span
+                                    class="b-status"
+                                    v-if="entry.item.status"
+                                    >{{ entry.item.status }}</span
                                 >
-                                <span class="coin b"
-                                    ><i class="i-tabler-coin" />{{
-                                        g.coinB || 54
-                                    }}</span
-                                >
-                                <span class="price">{{
-                                    g.price || '$49.97'
+                                <span class="b-date" v-if="entry.item.date">{{
+                                    entry.item.date
                                 }}</span>
                             </div>
+                        </div>
+                        <h3 class="nf-name" :title="entry.item.name">
+                            {{ entry.item.name }}
+                        </h3>
+                        <div class="nf-meta">
+                            <span class="coin a"
+                                ><i class="i-tabler-currency-bitcoin" />{{
+                                    entry.item.coinA || 75
+                                }}</span
+                            >
+                            <span class="coin b"
+                                ><i class="i-tabler-coin" />{{
+                                    entry.item.coinB || 54
+                                }}</span
+                            >
+                            <span class="price">{{
+                                entry.item.price || '$49.97'
+                            }}</span>
                         </div>
                     </div>
                 </component>
             </component>
         </div>
         <div v-else class="nf-empty">Loading...</div>
-        <div class="nf-dots" v-if="loopEnabled">
+        <div class="nf-dots" v-if="showDots">
             <span
-                v-for="(w, idx) in windows"
+                v-for="(g, idx) in list"
                 :key="'dot-' + idx"
                 class="dot"
-                :class="{ active: idx === activeWindow }"
-                @click="jumpToWindow(idx)"
+                :class="{ active: idx === activeItemGlobalIndex }"
+                @click="goTo(idx)"
             />
         </div>
     </section>
@@ -148,29 +150,7 @@
         if (w < 1180) return 4;
         return 5;
     });
-
-    // Build window slides stepping by perWindow (Netflix style) 12345 -> 67891 -> ...
-    const windows = computed(() => {
-        const arr = list.value;
-        const W = perWindow.value;
-        const L = arr.length;
-        if (L === 0) return [] as FeaturedGame[][];
-        if (W >= L) return [arr];
-        const result: FeaturedGame[][] = [];
-        let start = 0;
-        const seen = new Set<number>();
-        while (!seen.has(start)) {
-            seen.add(start);
-            const win: FeaturedGame[] = [];
-            for (let i = 0; i < W; i++) {
-                const item = arr[(start + i) % L];
-                if (item) win.push(item);
-            }
-            result.push(win);
-            start = (start + W) % L;
-        }
-        return result;
-    });
+    const gap = 18;
 
     // Swiper lazy import
     const SwiperCmp = shallowRef<any>(null);
@@ -178,8 +158,60 @@
     const modules = ref<any[]>([]);
     const ready = ref(false);
     const swiperRef = ref<any>(null);
-    const activeWindow = ref(0);
-    const loopEnabled = computed(() => windows.value.length > 1);
+    const activeItemGlobalIndex = ref<number>(0); // index within list
+    const showDots = computed(
+        () => list.value.length <= 40 && list.value.length > perWindow.value + 1
+    );
+    const isDragging = ref(false);
+    const REPEATS = 7; // odd ensures symmetrical center band
+    const repeatedList = computed(() => {
+        const base = list.value;
+        const L = base.length;
+        const result: { item: FeaturedGame; key: string; baseIndex: number }[] =
+            [];
+        if (!L) return result;
+        for (let r = 0; r < REPEATS; r++) {
+            for (let i = 0; i < L; i++) {
+                const it = base[i];
+                if (!it) continue;
+                result.push({
+                    item: it as FeaturedGame,
+                    key: (it.id ?? i) + '-r' + r + '-' + i,
+                    baseIndex: i
+                });
+            }
+        }
+        return result;
+    });
+    function middleBandIndex(baseIdx: number) {
+        const L = list.value.length || 1;
+        return baseIdx + L * Math.floor(REPEATS / 2);
+    }
+    function recenterToBase(baseIdx: number) {
+        const sw = swiperRef.value;
+        const L = list.value.length;
+        if (!sw || !L) return;
+        const target = middleBandIndex(baseIdx % L);
+        sw.slideTo(target, 0, false);
+    }
+    function keepInMiddle() {
+        const sw = swiperRef.value;
+        const L = list.value.length;
+        if (!sw || !L) return;
+        const total = L * REPEATS;
+        const idx = sw.realIndex ?? sw.activeIndex ?? 0;
+        if (idx < L || idx >= total - L) {
+            const base = idx % L;
+            recenterToBase(base);
+        }
+    }
+    watch(
+        () => list.value.length,
+        (L, old) => {
+            if (L && old && L !== old)
+                recenterToBase(activeItemGlobalIndex.value % L);
+        }
+    );
 
     // Autoplay options
     const autoplayOptions = computed(() =>
@@ -194,63 +226,165 @@
 
     function onInit(sw: any) {
         swiperRef.value = sw;
+        // initial active
+        requestAnimationFrame(updateActiveItemFromDom);
+        try {
+            sw.on('touchStart', () => {
+                isDragging.value = true;
+            });
+            sw.on('touchEnd', () => {
+                isDragging.value = false;
+                keepInMiddle();
+            });
+        } catch {
+            /* attach events failed */
+        }
+        // Initial center on middle band index 0
+        requestAnimationFrame(() => {
+            recenterToBase(0);
+            // multi-pass to ensure first active without user interaction
+            let pass = 0;
+            const run = () => {
+                updateActiveItemFromDom();
+                if (++pass < 5) requestAnimationFrame(run);
+            };
+            run();
+        });
     }
     function onSlideChange() {
-        if (!swiperRef.value) return;
-        const real = swiperRef.value.realIndex || 0;
-        activeWindow.value = real % windows.value.length;
+        keepInMiddle();
+        requestAnimationFrame(updateActiveItemFromDom);
         maybeLoadMore();
         prefetchNext();
     }
-    function jumpToWindow(idx: number) {
-        if (!swiperRef.value) return;
-        swiperRef.value.slideToLoop(idx, 600, true);
+    function goTo(idx: number) {
+        recenterToBase(idx);
+        const target = middleBandIndex(idx);
+        swiperRef.value?.slideTo(target, 520, true);
+    }
+    function navNextPage() {
+        swiperRef.value?.slideNext();
+    }
+    function navPrevPage() {
+        swiperRef.value?.slidePrev();
+    }
+    function cardStateClass(globalIdx: number) {
+        const active = activeItemGlobalIndex.value % list.value.length;
+        const total = list.value.length || 1;
+        let dist = Math.abs(globalIdx - active);
+        dist = Math.min(dist, total - dist);
+        return {
+            'is-active': globalIdx === active,
+            'is-near': dist === 1,
+            'is-far': dist > 1
+        };
+    }
+
+    // Real-time during drag / momentum
+    let rafId: number | null = null;
+    function onRealtimeMove() {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(updateActiveItemFromDom);
+    }
+    function updateActiveItemFromDom() {
+        // Find card whose center is closest to wrapper center
+        const root = document.querySelector('.nf-fg-wrapper');
+        if (!root) return;
+        const centerX =
+            root.getBoundingClientRect().left + root.clientWidth / 2;
+        const cards = root.querySelectorAll('.nf-item-slide');
+        let best: HTMLElement | null = null as HTMLElement | null;
+        let bestDist = Infinity;
+        cards.forEach((node) => {
+            const el = node as HTMLElement;
+            const r = el.getBoundingClientRect();
+            const c = r.left + r.width / 2;
+            const d = Math.abs(c - centerX);
+            if (d < bestDist) {
+                bestDist = d;
+                best = el;
+            }
+        });
+        if (best) {
+            const idxAttr = best.getAttribute('data-g-idx');
+            if (idxAttr) {
+                const gi = parseInt(idxAttr, 10);
+                if (!Number.isNaN(gi) && gi !== activeItemGlobalIndex.value) {
+                    activeItemGlobalIndex.value = gi;
+                    // Proactive load check when active shifts during drag
+                    maybeLoadMore();
+                    prefetchNext();
+                }
+            }
+        }
     }
 
     // Prefetch first image of next window
     function prefetchNext() {
         if (!import.meta.client) return;
-        if (!windows.value.length) return;
-        const nextWin =
-            windows.value[(activeWindow.value + 1) % windows.value.length];
-        const next = nextWin?.[0];
-        if (!next?.image) return;
-        const id = 'prefetch-win-' + next.id;
-        if (document.getElementById(id)) return;
-        const l = document.createElement('link');
-        l.id = id;
-        l.rel = 'prefetch';
-        l.as = 'image';
-        l.href = next.image;
-        document.head.appendChild(l);
+        const total = list.value.length;
+        if (!total) return;
+        // Prefetch 2 items ahead
+        for (let ahead = 1; ahead <= 2; ahead++) {
+            const itm =
+                list.value[(activeItemGlobalIndex.value + ahead) % total];
+            if (!itm?.image) continue;
+            const id = 'prefetch-item-' + itm.id;
+            if (document.getElementById(id)) continue;
+            const l = document.createElement('link');
+            l.id = id;
+            l.rel = 'prefetch';
+            l.as = 'image';
+            l.href = itm.image;
+            document.head.appendChild(l);
+        }
     }
 
     let loading = false;
     let last = 0;
     async function maybeLoadMore() {
-        const threshold = props.bufferThreshold ?? 2;
-        const total = list.value.length;
-        const W = perWindow.value;
-        const approxPos = activeWindow.value * W;
-        const remaining = total - approxPos - W;
-        if (remaining > threshold) return;
-        const now = performance.now();
-        if (loading || now - last < 500) return;
-        last = now;
-        loading = true;
-        if (typeof props.loader === 'function') {
-            try {
-                const more = await props.loader();
-                if (Array.isArray(more) && more.length) {
-                    list.value.push(...more);
-                    swiperRef.value?.updateSlides();
+        const dynamic = Math.max(Math.ceil(perWindow.value / 2), 2);
+        const threshold = props.bufferThreshold ?? dynamic;
+        let attempts = 0;
+        const MAX_BURST = 3; // safety cap per trigger
+        // Use loop to allow back-to-back loads until buffer satisfied or cap reached
+        while (attempts < MAX_BURST) {
+            const total = list.value.length;
+            const remaining = total - activeItemGlobalIndex.value - 1;
+            if (remaining > threshold) break;
+            const now = performance.now();
+            if (loading || now - last < 160) break; // shorter cooldown for burst
+            last = now;
+            loading = true;
+            attempts++;
+            if (typeof props.loader === 'function') {
+                try {
+                    const more = await props.loader();
+                    if (Array.isArray(more) && more.length) {
+                        const baseActive =
+                            activeItemGlobalIndex.value % list.value.length;
+                        list.value.push(...more);
+                        const sw = swiperRef.value;
+                        if (sw) {
+                            sw.updateSlides();
+                            recenterToBase(baseActive);
+                            requestAnimationFrame(() => {
+                                updateActiveItemFromDom();
+                                prefetchNext();
+                            });
+                        }
+                    } else {
+                        // no more data; stop loop
+                        attempts = MAX_BURST;
+                    }
+                } finally {
+                    loading = false;
                 }
-            } finally {
+            } else {
+                emit('load-more');
                 loading = false;
+                break; // external handler unknown timing
             }
-        } else {
-            emit('load-more');
-            loading = false;
         }
     }
 
@@ -268,7 +402,7 @@
         ready.value = true;
     });
 
-    defineExpose({ jumpToWindow });
+    defineExpose({ goTo });
 </script>
 
 <style scoped>
@@ -326,21 +460,14 @@
         overflow: visible;
         padding: 8px 2px 52px;
     }
-    .nf-window-slide {
+    .nf-item-slide {
         display: flex;
-        width: 100%;
+        justify-content: center;
     }
-    .nf-window {
-        --gap: 18px;
-        display: flex;
-        gap: var(--gap);
-        width: 100%;
-        justify-content: stretch;
-        align-items: stretch;
+    :deep(.swiper-slide) {
+        height: auto;
     }
     .nf-card {
-        /* Each card takes equal share; remove max-width clamp so items stretch */
-        flex: 1 1 calc((100% - (var(--cols) - 1) * var(--gap)) / var(--cols));
         background: linear-gradient(165deg, #181b20, #121417);
         border-radius: 26px;
         padding: 12px 12px 16px;
@@ -348,14 +475,30 @@
         display: flex;
         flex-direction: column;
         position: relative;
+        min-width: 0;
         transition:
-            transform 0.45s cubic-bezier(0.22, 0.8, 0.3, 1),
-            box-shadow 0.45s;
-        min-width: 0; /* allow text truncation within flex */
+            transform 0.55s cubic-bezier(0.22, 0.8, 0.3, 1),
+            box-shadow 0.55s,
+            border-color 0.4s;
+        border: 2px solid rgba(255, 255, 255, 0.06);
+        transform: scale(0.86) translateY(12px);
+        opacity: 0.6;
+        width: calc(
+            (min(1400px, 100%) - (var(--cols) - 1) * 18px) / var(--cols)
+        );
+    }
+    .nf-card.is-near {
+        transform: scale(0.93) translateY(6px);
+        opacity: 0.85;
+    }
+    .nf-card.is-active {
+        transform: scale(1.05) translateY(0);
+        box-shadow: 0 18px 42px -14px rgba(0, 0, 0, 0.65);
+        border-color: #ff7f30;
+        opacity: 1;
     }
     .nf-card:hover {
-        transform: translateY(-6px) scale(1.04);
-        box-shadow: 0 14px 32px -10px rgba(0, 0, 0, 0.6);
+        transform: scale(1.07) translateY(-4px);
     }
     .nf-thumb {
         position: relative;
@@ -476,13 +619,13 @@
         font-size: 0.85rem;
     }
     @media (max-width: 1180px) {
-        .nf-window {
-            --gap: 16px;
+        .nf-card {
+            padding: 12px 10px 14px;
         }
     }
     @media (max-width: 880px) {
-        .nf-window {
-            --gap: 14px;
+        .nf-card {
+            transform: scale(0.9) translateY(10px);
         }
     }
     @media (max-width: 640px) {
