@@ -1,10 +1,12 @@
 <template>
     <!-- Hero Section start  -->
-    <section class="hero-section position-relative pt-20 pb-120">
+    <section
+        class="hero-section position-relative drag-none pt-20 pb-120 select-none"
+    >
         <div class="gradient-bg"></div>
         <div class="gradient-bg2"></div>
         <div class="star-area">
-            <div class="big-star">
+            <div class="big-star drag-none">
                 <img class="w-100" src="/assets/img/big-star.png" alt="star" />
             </div>
             <div class="small-star">
@@ -41,7 +43,7 @@
                         </h1>
                         <a
                             href="https://www.youtube.com/watch?v=G5kzUpWAusI"
-                            class="btn-half-border bgp-1 popupvideo mfp-iframe relative flex rounded-full px-4! py-3!"
+                            class="drag-none btn-half-border bgp-1 popupvideo mfp-iframe relative flex rounded-full px-4! py-3! select-none"
                             >Play Now</a
                         >
                     </div>
@@ -56,7 +58,7 @@
                             class="hero-banner-bg flex items-center justify-center"
                         >
                             <img
-                                class="h-full w-full object-contain"
+                                class="drag-none h-full w-full object-contain"
                                 src="/assets/img/bg-1.png"
                                 alt="banner"
                             />
@@ -65,7 +67,7 @@
                             class="hero-banner-img flex max-w-none items-center justify-center"
                         >
                             <img
-                                class="h-full w-full object-contain"
+                                class="drag-none h-full w-full object-contain"
                                 src="/assets/img/hero.png"
                                 alt="banner"
                             />
