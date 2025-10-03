@@ -5,7 +5,7 @@
         @mouseleave="resumeAutoplay"
     >
         <div class="nf-header">
-            <h2 class="nf-title">Netflix Carousel</h2>
+            <h2 class="nf-title cursor-scale growDown2">Netflix Carousel</h2>
             <div class="nf-controls">
                 <button
                     class="nf-btn prev"
