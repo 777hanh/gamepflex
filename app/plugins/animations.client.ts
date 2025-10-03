@@ -7,16 +7,86 @@ export default defineNuxtPlugin(() => {
         // Register GSAP plugins
         gsap.registerPlugin(ScrollTrigger);
 
-        // Initialize AOS (replay when scroll back into view)
-        AOS.init({
-            duration: 800,
-            delay: 0,
-            easing: 'ease-out-cubic',
-            once: false, // allow re-trigger when re-entering viewport
-            mirror: true, // animate on scrolling out (so scroll up then down replays nicely)
-            anchorPlacement: 'top-bottom',
-            offset: 120
-        });
+        // AOS RE-ENABLED - Using AOS for content animations
+        // GSAP only for specific scroll animations (sword, diamond, etc.)
+        console.log(
+            '[Animations] AOS enabled for content, GSAP for scroll effects'
+        );
+
+        // CRITICAL: Remove data-aos from GSAP sections BEFORE AOS.init()
+        // This prevents AOS from applying CSS transforms that conflict with GSAP
+        const GSAP_SECTIONS = [
+            '#swiper-3d',
+            '#top-player',
+            '#tournament-hero',
+            '#cta'
+        ];
+
+        const removeAOSFromGsapSections = () => {
+            GSAP_SECTIONS.forEach((selector) => {
+                const section = document.querySelector(selector);
+                if (section) {
+                    // Remove data-aos from section itself (not children)
+                    if (section.hasAttribute('data-aos')) {
+                        console.log(
+                            '[AOS] Removing data-aos from GSAP section:',
+                            selector
+                        );
+                        section.removeAttribute('data-aos');
+                        section.removeAttribute('data-aos-duration');
+                        section.removeAttribute('data-aos-delay');
+                        section.removeAttribute('data-aos-easing');
+                    }
+
+                    // Also remove from GSAP animation elements (sword, diamond, console, banner)
+                    const gsapElements = section.querySelectorAll(
+                        '.sword-area, .diamond-area, .game-console-area, .footer-banner-img'
+                    );
+                    gsapElements.forEach((el) => {
+                        if (el.hasAttribute('data-aos')) {
+                            console.log(
+                                '[AOS] Removing data-aos from GSAP element:',
+                                el.className
+                            );
+                            el.removeAttribute('data-aos');
+                            el.removeAttribute('data-aos-duration');
+                            el.removeAttribute('data-aos-delay');
+                            el.removeAttribute('data-aos-easing');
+                        }
+                    });
+                }
+            });
+        };
+
+        // Wait for DOM to be ready before removing AOS and initializing
+        const initAOS = () => {
+            console.log('[AOS] Initializing with GSAP conflict prevention...');
+
+            // Remove AOS attributes from GSAP sections
+            removeAOSFromGsapSections();
+
+            // Initialize AOS (simple and reliable!)
+            // Now works with normal window scroll (fixed .site-wrapper positioning removed)
+            AOS.init({
+                duration: 800,
+                delay: 0,
+                easing: 'ease-out-cubic',
+                once: false, // allow re-trigger when re-entering viewport
+                mirror: true, // animate on scrolling out (so scroll up then down replays nicely)
+                anchorPlacement: 'top-bottom',
+                offset: 120,
+                disable: false
+            });
+
+            console.log('[AOS] Initialized successfully');
+        }; // Delay AOS init to ensure DOM is ready (but let GSAP scroll animations init first)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(initAOS, 200); // Delay to let GSAP init first
+            });
+        } else {
+            setTimeout(initAOS, 200);
+        }
 
         // Observer reset animation để đảm bảo mọi data-aos đều replay trừ khi opt-out.
         // Opt-out attributes: data-aos-mirror-none, data-aos-once, data-aos-single, data-aos-sticky
@@ -68,9 +138,34 @@ export default defineNuxtPlugin(() => {
             );
             const observeAll = () => {
                 normalize();
-                document
-                    .querySelectorAll('[data-aos]')
-                    .forEach((el) => observer.observe(el));
+
+                // CRITICAL: Exclude sections with GSAP ScrollTrigger animations
+                // These sections use GSAP, not AOS, to avoid conflicts
+                const GSAP_SECTIONS = [
+                    '#swiper-3d',
+                    '#top-player',
+                    '#tournament-hero',
+                    '#cta'
+                ];
+
+                document.querySelectorAll('[data-aos]').forEach((el) => {
+                    // Skip if element is inside a GSAP-controlled section
+                    const isInsideGsapSection = GSAP_SECTIONS.some(
+                        (selector) => {
+                            const section = document.querySelector(selector);
+                            return section && section.contains(el);
+                        }
+                    );
+
+                    if (!isInsideGsapSection) {
+                        observer.observe(el);
+                    } else {
+                        console.log(
+                            '[AOS] Skipping element in GSAP section:',
+                            el
+                        );
+                    }
+                });
             };
             observeAll();
             return { observer, observeAll };

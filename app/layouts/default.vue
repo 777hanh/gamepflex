@@ -99,6 +99,7 @@
         margin: 0;
         padding: 0;
         overflow-x: hidden;
+        overflow-y: auto;
         scroll-behavior: smooth;
     }
 
@@ -111,13 +112,14 @@
     }
 
     .site-wrapper {
-        position: fixed;
-        inset: 0;
+        /* Changed from position: fixed to position: relative */
+        /* This allows normal window scroll for GSAP and AOS */
+        position: relative;
         display: flex;
         flex-direction: column;
         min-height: 100vh;
-        overflow-y: auto;
         overflow-x: hidden;
+        overflow-y: visible; /* Let body handle vertical scroll */
     }
 
     .main-content {

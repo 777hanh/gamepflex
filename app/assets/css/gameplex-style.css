@@ -2456,11 +2456,11 @@ ul li {
     color: rgb(var(--p1));
 }
 
-@media (min-width: 992px) {
+/* @media (min-width: 992px) {
     .footer {
-        overflow: initial;
+        overflow: hidden;
     }
-}
+} */
 @media (max-width: 991px) {
     .footer {
         overflow: hidden;

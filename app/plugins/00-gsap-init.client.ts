@@ -16,4 +16,13 @@ export default defineNuxtPlugin(() => {
             /* ignore */
         }
     }
+
+    // ScrollTrigger config for better performance
+    ScrollTrigger.config({
+        autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load'
+    });
+
+    console.log(
+        '[GSAP Init] ScrollTrigger registered and configured for window scroll'
+    );
 });

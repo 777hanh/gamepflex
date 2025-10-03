@@ -29,6 +29,7 @@
     "pinia": "^3.0.3",
     "swiper": "^12.0.2",
     "typescript": "^5.9.2",
+    "vanilla-tilt": "^1.8.1",
     "vue": "^3.5.21",
     "vue-router": "^4.5.1",
     "vue-tsc": "^3.1.0"
