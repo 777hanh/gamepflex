@@ -12,6 +12,8 @@
                 :is-open="isNotificationOpen"
                 @close="closeNotification"
             />
+            <!-- custom cursor element -->
+            <div class="cursor" aria-hidden="true"></div>
         </div>
     </div>
 </template>
