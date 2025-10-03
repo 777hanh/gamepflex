@@ -30,7 +30,11 @@
                 :space-between="gap"
                 :speed="520"
                 grab-cursor
-                :style="{ '--cols': perWindow }"
+                :style="{
+                    '--cols': perWindow,
+                    '--gap': gap + 'px',
+                    '--card-max-width': cardMaxWidth
+                }"
                 :autoplay="autoplayOptions"
                 @swiper="onInit"
                 @slide-change="onSlideChange"
@@ -123,6 +127,12 @@
         autoplayDelay?: number;
         loader?: () => Promise<FeaturedGame[]>;
         bufferThreshold?: number;
+        /** Bật / tắt giới hạn max-width cho card (default true) */
+        constrainWidth?: boolean;
+        /** Max container width để chia card (default 1400) */
+        maxContainerWidth?: number;
+        /** Dynamic gap theo số cột (default true) */
+        dynamicGap?: boolean;
     }>();
     const emit = defineEmits<{ (e: 'load-more'): void }>();
 
@@ -150,7 +160,19 @@
         if (w < 1180) return 4;
         return 5;
     });
-    const gap = 18;
+    const gap = computed(() => {
+        if (props.dynamicGap === false) return 18;
+        const pw = perWindow.value;
+        if (pw <= 2) return 36;
+        if (pw === 3) return 28;
+        if (pw === 4) return 22;
+        return 18;
+    });
+    const cardMaxWidth = computed(() => {
+        if (props.constrainWidth === false) return 'none';
+        const maxW = props.maxContainerWidth ?? 1400;
+        return `calc((${maxW}px - (var(--cols) - 1) * var(--gap)) / var(--cols))`;
+    });
 
     // Swiper lazy import
     const SwiperCmp = shallowRef<any>(null);
@@ -239,6 +261,32 @@
         } catch {
             /* attach events failed */
         }
+        // pointer tilt for 3d cards
+        const rootEl = document.querySelector('.nf-fg-wrapper');
+        if (rootEl) {
+            rootEl.addEventListener('pointermove', (e: Event) => {
+                const pe = e as PointerEvent;
+                const cards = rootEl.querySelectorAll('.nf-card');
+                cards.forEach((c) => {
+                    const r = (c as HTMLElement).getBoundingClientRect();
+                    const cx = r.left + r.width / 2;
+                    const pct = Math.max(
+                        -1,
+                        Math.min(1, (pe.clientX - cx) / (r.width * 0.9))
+                    );
+                    (c as HTMLElement).style.setProperty(
+                        '--hover-tilt',
+                        pct * 6 + 'deg'
+                    );
+                });
+            });
+            rootEl.addEventListener('pointerleave', () => {
+                const cards = rootEl.querySelectorAll('.nf-card');
+                cards.forEach((c) =>
+                    (c as HTMLElement).style.removeProperty('--hover-tilt')
+                );
+            });
+        }
         // Initial center on middle band index 0
         requestAnimationFrame(() => {
             recenterToBase(0);
@@ -257,26 +305,57 @@
         maybeLoadMore();
         prefetchNext();
     }
+    const NAV_SPEED = 420;
+    function centerOnBase(baseIdx: number, speed = NAV_SPEED) {
+        const L = list.value.length;
+        if (!swiperRef.value || !L) return;
+        const normalized = ((baseIdx % L) + L) % L;
+        const target = middleBandIndex(normalized);
+        swiperRef.value.slideTo(target, speed, true);
+        // double pass only
+        requestAnimationFrame(() => updateActiveItemFromDom());
+        setTimeout(() => updateActiveItemFromDom(), speed - 30);
+    }
     function goTo(idx: number) {
-        recenterToBase(idx);
-        const target = middleBandIndex(idx);
-        swiperRef.value?.slideTo(target, 520, true);
+        centerOnBase(idx);
+    }
+    let manualNavLockUntil = 0;
+    function navStep(dir: number) {
+        const sw = swiperRef.value;
+        const L = list.value.length;
+        if (!sw || !L) return;
+        const next = (((activeItemGlobalIndex.value + dir) % L) + L) % L;
+        activeItemGlobalIndex.value = next; // instant highlight
+        manualNavLockUntil = performance.now() + NAV_SPEED - 20;
+        sw.slideTo(sw.realIndex + dir, NAV_SPEED, true);
+        // correction pass near end
+        setTimeout(() => {
+            manualNavLockUntil = 0;
+            updateActiveItemFromDom();
+            keepInMiddle();
+        }, NAV_SPEED + 10);
     }
     function navNextPage() {
-        swiperRef.value?.slideNext();
+        navStep(1);
     }
     function navPrevPage() {
-        swiperRef.value?.slidePrev();
+        navStep(-1);
     }
     function cardStateClass(globalIdx: number) {
-        const active = activeItemGlobalIndex.value % list.value.length;
         const total = list.value.length || 1;
-        let dist = Math.abs(globalIdx - active);
-        dist = Math.min(dist, total - dist);
+        const active = activeItemGlobalIndex.value % total;
+        // normalized shortest signed diff (-total/2 .. total/2]
+        let diff = (globalIdx - active + total) % total;
+        if (diff > total / 2) diff -= total;
+        const abs = Math.abs(diff);
         return {
-            'is-active': globalIdx === active,
-            'is-near': dist === 1,
-            'is-far': dist > 1
+            'is-active': diff === 0,
+            'is-near': abs === 1,
+            'is-far': abs > 1,
+            'near-left': diff === -1,
+            'near-right': diff === 1,
+            'far-left': diff <= -2,
+            'far-right': diff >= 2
         };
     }
 
@@ -287,7 +366,7 @@
         rafId = requestAnimationFrame(updateActiveItemFromDom);
     }
     function updateActiveItemFromDom() {
-        // Find card whose center is closest to wrapper center
+        if (performance.now() < manualNavLockUntil) return;
         const root = document.querySelector('.nf-fg-wrapper');
         if (!root) return;
         const centerX =
@@ -311,7 +390,6 @@
                 const gi = parseInt(idxAttr, 10);
                 if (!Number.isNaN(gi) && gi !== activeItemGlobalIndex.value) {
                     activeItemGlobalIndex.value = gi;
-                    // Proactive load check when active shifts during drag
                     maybeLoadMore();
                     prefetchNext();
                 }
@@ -319,12 +397,10 @@
         }
     }
 
-    // Prefetch first image of next window
     function prefetchNext() {
         if (!import.meta.client) return;
         const total = list.value.length;
         if (!total) return;
-        // Prefetch 2 items ahead
         for (let ahead = 1; ahead <= 2; ahead++) {
             const itm =
                 list.value[(activeItemGlobalIndex.value + ahead) % total];
@@ -346,14 +422,13 @@
         const dynamic = Math.max(Math.ceil(perWindow.value / 2), 2);
         const threshold = props.bufferThreshold ?? dynamic;
         let attempts = 0;
-        const MAX_BURST = 3; // safety cap per trigger
-        // Use loop to allow back-to-back loads until buffer satisfied or cap reached
+        const MAX_BURST = 3;
         while (attempts < MAX_BURST) {
             const total = list.value.length;
             const remaining = total - activeItemGlobalIndex.value - 1;
             if (remaining > threshold) break;
             const now = performance.now();
-            if (loading || now - last < 160) break; // shorter cooldown for burst
+            if (loading || now - last < 160) break;
             last = now;
             loading = true;
             attempts++;
@@ -374,7 +449,6 @@
                             });
                         }
                     } else {
-                        // no more data; stop loop
                         attempts = MAX_BURST;
                     }
                 } finally {
@@ -383,7 +457,7 @@
             } else {
                 emit('load-more');
                 loading = false;
-                break; // external handler unknown timing
+                break;
             }
         }
     }
@@ -397,7 +471,8 @@
         SwiperCmp.value = Swiper;
         SwiperSlideCmp.value = SwiperSlide;
         const { Navigation, Autoplay } = mod as any;
-        modules.value = [Navigation, Autoplay]; // @ts-expect-error css side effect
+        modules.value = [Navigation, Autoplay];
+        // @ts-expect-error - CSS side-effect import without types
         await import('swiper/css');
         ready.value = true;
     });
@@ -409,6 +484,17 @@
     .nf-fg {
         padding: 70px 0 60px;
         position: relative;
+        --card-scale-base: 0.9;
+        --card-scale-near: 0.96;
+        --card-scale-active: 1.06;
+        --card-radius: 26px;
+        --card-glow: 0 18px 42px -14px rgba(0, 0, 0, 0.65);
+        --card-bg: linear-gradient(165deg, #1b1f24, #111317 55%);
+        --accent: #ff7f30;
+        --accent-end: #ff4d00;
+        --border-fade: rgba(255, 255, 255, 0.08);
+        --border-active: #ff7f30;
+        --transition-fast: 0.38s cubic-bezier(0.22, 0.8, 0.3, 1);
     }
     .nf-fg-head {
         display: flex;
@@ -455,6 +541,8 @@
     }
     .nf-fg-wrapper {
         position: relative;
+        perspective: 1600px;
+        perspective-origin: 50% 45%;
     }
     .nf-fg-swiper {
         overflow: visible;
@@ -463,42 +551,138 @@
     .nf-item-slide {
         display: flex;
         justify-content: center;
+        transform-style: preserve-3d;
     }
     :deep(.swiper-slide) {
         height: auto;
     }
     .nf-card {
-        background: linear-gradient(165deg, #181b20, #121417);
-        border-radius: 26px;
-        padding: 12px 12px 16px;
-        box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.55);
+        background: var(--card-bg);
+        border-radius: var(--card-radius);
+        padding: 14px 14px 18px;
+        box-shadow: 0 6px 14px -6px rgba(0, 0, 0, 0.55);
         display: flex;
         flex-direction: column;
         position: relative;
         min-width: 0;
+        border: 1.5px solid var(--border-fade);
+        transform: translateY(12px) scale(var(--card-scale-base)) translateZ(0);
+        opacity: 0.64;
+        /* Width note:
+           Swiper already divides container width by slidesPerView (perWindow).
+           The previous calc() divided a second time, making cards too narrow.
+           We let the slide width drive sizing and just fill 100%.
+           Add a max-width so when container >1400px we keep intended proportions. */
+        width: 100%;
+        max-width: var(--card-max-width, none);
+        flex: 1 0 auto;
         transition:
-            transform 0.55s cubic-bezier(0.22, 0.8, 0.3, 1),
+            transform var(--transition-fast),
             box-shadow 0.55s,
-            border-color 0.4s;
-        border: 2px solid rgba(255, 255, 255, 0.06);
-        transform: scale(0.86) translateY(12px);
-        opacity: 0.6;
-        width: calc(
-            (min(1400px, 100%) - (var(--cols) - 1) * 18px) / var(--cols)
+            border-color 0.5s,
+            opacity 0.45s,
+            filter 0.6s;
+        will-change: transform;
+        overflow: hidden;
+    }
+    .nf-card::before,
+    .nf-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+    }
+    /* Glow rim (active) */
+    .nf-card::before {
+        background: linear-gradient(130deg, var(--accent), var(--accent-end));
+        opacity: 0;
+        transition: opacity 0.6s;
+        mask:
+            linear-gradient(#000, #000) content-box,
+            linear-gradient(#000, #000);
+        -webkit-mask:
+            linear-gradient(#000, #000) content-box,
+            linear-gradient(#000, #000);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        padding: 2px;
+    }
+    /* Subtle inner vignette */
+    .nf-card::after {
+        background: radial-gradient(
+            circle at 50% 40%,
+            rgba(255, 255, 255, 0.08),
+            rgba(0, 0, 0, 0.4) 70%
         );
+        mix-blend-mode: overlay;
+        opacity: 0;
+        transition: opacity 0.6s;
+    }
+    /* Depth layering */
+    .nf-card.is-far {
+        z-index: 1;
     }
     .nf-card.is-near {
-        transform: scale(0.93) translateY(6px);
-        opacity: 0.85;
+        z-index: 2;
     }
     .nf-card.is-active {
-        transform: scale(1.05) translateY(0);
-        box-shadow: 0 18px 42px -14px rgba(0, 0, 0, 0.65);
-        border-color: #ff7f30;
+        z-index: 3;
+    }
+    /* Base depth transform states */
+    .nf-card.is-far.far-left {
+        transform: translateY(20px) translateZ(-180px) rotateY(32deg)
+            scale(0.82);
+        opacity: 0.35;
+        filter: blur(0.5px) saturate(0.8);
+    }
+    .nf-card.is-far.far-right {
+        transform: translateY(20px) translateZ(-180px) rotateY(-32deg)
+            scale(0.82);
+        opacity: 0.35;
+        filter: blur(0.5px) saturate(0.8);
+    }
+    .nf-card.is-near.near-left {
+        transform: translateY(10px) translateZ(-70px) rotateY(18deg)
+            scale(var(--card-scale-near));
+        opacity: 0.87;
+    }
+    .nf-card.is-near.near-right {
+        transform: translateY(10px) translateZ(-70px) rotateY(-18deg)
+            scale(var(--card-scale-near));
+        opacity: 0.87;
+    }
+    .nf-card.is-active {
+        transform: translateY(0) translateZ(40px) rotateY(0deg)
+            scale(var(--card-scale-active));
+        box-shadow:
+            var(--card-glow),
+            0 0 0 1px rgba(255, 255, 255, 0.06),
+            0 28px 60px -18px rgba(0, 0, 0, 0.65);
+        border-color: var(--border-active);
         opacity: 1;
     }
-    .nf-card:hover {
-        transform: scale(1.07) translateY(-4px);
+    .nf-card.is-active::before {
+        opacity: 1;
+    }
+    .nf-card.is-active::after {
+        opacity: 0.65;
+    }
+    .nf-card:hover:not(.is-active) {
+        transform: translateY(4px) translateZ(-40px)
+            scale(calc(var(--card-scale-near) + 0.02))
+            rotateY(var(--hover-tilt, 0deg));
+        opacity: 0.95;
+    }
+    .nf-card:hover:not(.is-active)::after {
+        opacity: 0.5;
+    }
+    .nf-card:focus-visible {
+        outline: 2px solid #19b4ff;
+        outline-offset: 3px;
+    }
+    .nf-card:active {
+        filter: brightness(1.1);
     }
     .nf-thumb {
         position: relative;
@@ -507,24 +691,44 @@
         overflow: hidden;
         background: #0d0f12;
     }
+    .nf-thumb::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.55),
+            rgba(0, 0, 0, 0) 55%
+        );
+        opacity: 0.85;
+        pointer-events: none;
+    }
     .nf-thumb img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 1s ease;
-        transform: scale(1.05);
+        transition:
+            transform 1.1s ease,
+            filter 1s;
+        transform: scale(1.04);
+    }
+    .nf-card.is-active .nf-thumb img {
+        transform: scale(1.1);
     }
     .nf-card:hover .nf-thumb img {
-        transform: scale(1.12);
+        transform: scale(1.14);
+        filter: brightness(1.07);
     }
     .nf-badges {
         position: absolute;
-        inset: auto 8px 8px 8px;
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
         display: flex;
         justify-content: space-between;
         gap: 6px;
+        font-size: 0.62rem;
         pointer-events: none;
-        font-size: 0.6rem;
     }
     .b-status {
         background: rgba(0, 0, 0, 0.55);
@@ -548,13 +752,20 @@
         font-weight: 700;
         margin: 14px 4px 10px;
         color: #fff;
-        line-height: 1.2;
+        line-height: 1.22;
         min-height: 2.1em;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        letter-spacing: 0.3px;
+    }
+    .nf-card.is-active .nf-name {
+        background: linear-gradient(92deg, #fff, #cfefff 45%, #7ddcff 80%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
     }
     .nf-meta {
         margin-top: auto;
@@ -570,9 +781,10 @@
         align-items: center;
         gap: 4px;
         padding: 4px 8px 4px 6px;
-        border-radius: 20px;
+        border-radius: 18px;
         background: #1d2127;
         line-height: 1;
+        backdrop-filter: blur(4px);
     }
     .coin.a {
         background: linear-gradient(140deg, #242017, #38240e);
@@ -620,12 +832,14 @@
     }
     @media (max-width: 1180px) {
         .nf-card {
-            padding: 12px 10px 14px;
+            padding: 12px 12px 16px;
         }
     }
     @media (max-width: 880px) {
         .nf-card {
-            transform: scale(0.9) translateY(10px);
+            --card-scale-base: 0.88;
+            --card-scale-near: 0.94;
+            --card-scale-active: 1.05;
         }
     }
     @media (max-width: 640px) {
