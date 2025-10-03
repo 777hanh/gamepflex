@@ -12,22 +12,24 @@ export default defineNuxtPlugin(() => {
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
 
-    // Real-time (no smoothing) update loop using rAF
+    // Keep a continuous loop (lighter than mousemove paints) so we never need a click to resume.
+    // We only gate visual updates with a 'paused' flag but still keep rAF chain alive.
+    let paused = false;
     const loop = () => {
-        cursor.style.left = mouseX + 'px';
-        cursor.style.top = mouseY + 'px';
+        if (!paused) {
+            cursor.style.left = mouseX + 'px';
+            cursor.style.top = mouseY + 'px';
+        }
         requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
 
-    window.addEventListener(
-        'mousemove',
-        (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        },
-        { passive: true }
-    );
+    const moveHandler = (e: MouseEvent | PointerEvent) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    };
+    window.addEventListener('mousemove', moveHandler, { passive: true });
+    window.addEventListener('pointermove', moveHandler, { passive: true });
 
     const BIG = 'big-cursor';
     const SMALL = 'small-cursor';
@@ -69,4 +71,44 @@ export default defineNuxtPlugin(() => {
         document.removeEventListener('touchstart', touchHandler);
     };
     document.addEventListener('touchstart', touchHandler, { passive: true });
+
+    // --------- Visibility / Focus handling ---------
+    // Some browsers stop rAF automatically, but we explicitly pause to avoid unnecessary work
+    const pause = () => {
+        paused = true;
+        resetClasses();
+        cursor.style.opacity = '0';
+    };
+    const resume = () => {
+        if (cursor.style.display === 'none') return; // suppressed on touch
+        paused = false;
+        cursor.style.opacity = '1';
+        // Safety: center if somehow coordinates unset
+        if (Number.isNaN(mouseX) || Number.isNaN(mouseY)) {
+            mouseX = window.innerWidth / 2;
+            mouseY = window.innerHeight / 2;
+        }
+    };
+
+    window.addEventListener('blur', pause);
+    window.addEventListener('focus', resume);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') pause();
+        else resume();
+    });
+
+    // Hide when pointer leaves window, show again when re-enter
+    document.addEventListener('mouseleave', () => {
+        cursor.style.opacity = '0';
+        paused = true; // temporarily stop updating position (not critical)
+    });
+    document.addEventListener('mouseenter', () => {
+        paused = false;
+        resume();
+    });
+
+    // Mild fade transition (only if not already defined in CSS)
+    if (!cursor.style.transition) {
+        cursor.style.transition = 'opacity .25s ease';
+    }
 });
