@@ -53,6 +53,15 @@
 @import 'tailwindcss';
 @import '@nuxt/ui';
 
+/* SplitText performance enhancements */
+.gp-char,
+.gp-word,
+.gp-line {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
 /* body {
   overflow: hidden !important;
 } */
@@ -62,5 +71,4 @@
     -khtml-user-drag: none;
     -moz-user-drag: none;
     -o-user-drag: none;
-    user-drag: none;
 }

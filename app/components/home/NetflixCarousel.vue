@@ -5,7 +5,12 @@
         @mouseleave="resumeAutoplay"
     >
         <div class="nf-header">
-            <h2 class="nf-title cursor-scale growDown2">Netflix Carousel</h2>
+            <h2
+                class="nf-title cursor-scale growDown2 title-anim"
+                data-split-start="top 90%"
+            >
+                Netflix Carousel
+            </h2>
             <div class="nf-controls">
                 <button
                     class="nf-btn prev"
@@ -67,6 +72,7 @@
 
 <script setup lang="ts">
     import { ref, computed, onMounted, shallowRef } from 'vue';
+    import { useAnimation } from '@/composables/useAnimation';
 
     interface Item {
         id?: string | number;
@@ -162,6 +168,8 @@
 
     onMounted(async () => {
         if (!import.meta.client) return;
+        // ensure global animation setup for this component (SplitText etc.)
+        useAnimation();
         const [{ Swiper, SwiperSlide }, mod] = await Promise.all([
             import('swiper/vue'),
             import('swiper/modules')
