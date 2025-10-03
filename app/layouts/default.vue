@@ -118,7 +118,7 @@
         display: flex;
         flex-direction: column;
         min-height: 100vh;
-        overflow-x: hidden;
+        overflow-x: visible; /* Allow footer banner to show outside */
         overflow-y: visible; /* Let body handle vertical scroll */
     }
 

@@ -34,7 +34,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" id="sword-trigger">
                 <div class="col">
                     <div
                         class="swiper swiper-top-player top-player-overflow-guard"
@@ -168,6 +168,12 @@
 </template>
 
 <script setup lang="ts">
+    import { onMounted } from 'vue';
+    import { gsap } from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+    if (import.meta.client) gsap.registerPlugin(ScrollTrigger);
+
     // Player data array for cleaner template (maintains raw fidelity)
     interface Player {
         id: number;
@@ -210,7 +216,53 @@
     ];
 
     // Repeat pattern for smooth loop (4x = 12 total slides)
-    const allSlides = [...players, ...players, ...players, ...players];
+    const allSlides = [
+        ...players,
+        ...players,
+        ...players,
+        ...players,
+        ...players,
+        ...players,
+        ...players
+    ];
+
+    onMounted(() => {
+        if (!import.meta.client) return;
+
+        const prefersReduced = window.matchMedia(
+            '(prefers-reduced-motion: reduce)'
+        ).matches;
+        if (prefersReduced) return;
+
+        // Wait for GSAP ScrollTrigger to be initialized
+        setTimeout(() => {
+            const topPlayerSection = document.getElementById('top-player');
+            const swordArea =
+                document.querySelector<HTMLElement>('.sword-area');
+
+            if (!topPlayerSection || !swordArea) {
+                console.error('Top Player section or Sword not found!');
+                return;
+            }
+
+            console.log('Sword element found:', swordArea);
+
+            // Scene 2: Sword rotates 180deg when #top-player appears
+            gsap.to(swordArea, {
+                rotate: '180deg',
+                ease: 'power2.inOut',
+                scrollTrigger: {
+                    trigger: topPlayerSection,
+                    start: 'top 80%',
+                    end: 'top 20%',
+                    scrub: 2,
+                    markers: true,
+                    onEnter: () =>
+                        console.log('Sword rotation animation triggered!')
+                }
+            });
+        }, 300);
+    });
 </script>
 
 <style scoped>
