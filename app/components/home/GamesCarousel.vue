@@ -15,8 +15,6 @@
                     </p>
                     <h2
                         class="display-6 fw-bold text-anim title-anim mb-3 text-white"
-                        data-split-type="words, chars"
-                        data-split-duration="0.75"
                         data-split-stagger="0.04"
                         data-split-effect="up"
                         data-split-once="false"
@@ -40,23 +38,40 @@
             <ClientOnly>
                 <Swiper
                     :modules="swiperModules"
-                    class="games-swiper"
+                    class="games-swiper drag-none select-none"
                     :space-between="24"
-                    :slides-per-view="1.1"
-                    :breakpoints="{
-                        576: { slidesPerView: 1.5 },
-                        768: { slidesPerView: 2.3 },
-                        992: { slidesPerView: 3.2 },
-                        1200: { slidesPerView: 4 }
+                    :slides-per-view="'auto'"
+                    :autoplay="{
+                        delay: 3200,
+                        disableOnInteraction: true,
+                        pauseOnMouseEnter: true
                     }"
-                    :autoplay="{ delay: 3000, disableOnInteraction: false }"
-                    :speed="600"
-                    :loop="true"
+                    :speed="420"
+                    :loop="enableLoop"
+                    :round-lengths="true"
+                    :touch-ratio="1.05"
+                    :resistance-ratio="0.82"
+                    :loop-additional-slides="2"
+                    :watch-slides-progress="true"
+                    :grab-cursor="true"
+                    :free-mode="{
+                        enabled: true,
+                        momentum: true,
+                        sticky: false
+                    }"
                     navigation
+                    @touchstart="onDragStart"
+                    @touchend="onDragEnd"
+                    @slider-first-move="onDragStart"
                 >
                     <SwiperSlide v-for="(g, i) in games" :key="g.id">
                         <div
-                            class="carousel-item magnetic-depth magnetic h-100"
+                            :class="[
+                                'carousel-item',
+                                'magnetic-depth',
+                                !disableMagnetic && 'magnetic',
+                                'h-100'
+                            ]"
                             data-aos="fade-up"
                             data-aos-duration="700"
                             :data-aos-delay="(i * 60) % 480"
@@ -109,12 +124,14 @@
 
 <script setup lang="ts">
     import { Swiper, SwiperSlide } from 'swiper/vue';
-    import { Autoplay, Navigation } from 'swiper/modules';
+    import { Autoplay, Navigation, FreeMode } from 'swiper/modules';
     // @ts-expect-error swiper css types not required
     import 'swiper/css';
     // @ts-expect-error swiper css types not required
     import 'swiper/css/navigation';
     import { useAnimation } from '@/composables/useAnimation';
+    import { computed, ref } from 'vue';
+
     export interface GameItem {
         id: number;
         name: string;
@@ -122,14 +139,60 @@
         image: string;
         players: string;
     }
-    defineProps<{ games: GameItem[] }>();
-    const swiperModules = [Autoplay, Navigation];
+
+    const props = defineProps<{ games: GameItem[] }>();
+    // Only enable loop when we have enough slides to avoid constant cloning reposition jumps
+    const enableLoop = computed(() => props.games && props.games.length > 6);
+    const swiperModules = [Autoplay, Navigation, FreeMode];
     useAnimation();
+
+    // Temporarily disable magnetic hover effect during drag to reduce mousemove overhead / repaints
+    const disableMagnetic = ref(false);
+    const dragTimeout = ref<number | null>(null);
+    const onDragStart = () => {
+        if (dragTimeout.value) {
+            window.clearTimeout(dragTimeout.value);
+            dragTimeout.value = null;
+        }
+        disableMagnetic.value = true;
+    };
+    const onDragEnd = () => {
+        // Give a tiny delay so momentum animation finishes before re-enabling hover effects
+        dragTimeout.value = window.setTimeout(() => {
+            disableMagnetic.value = false;
+        }, 180);
+    };
+
+    // Declare slots to satisfy TS (navigation-prev / navigation-next custom slots)
+    defineSlots<{
+        'navigation-prev': () => any;
+        'navigation-next': () => any;
+    }>();
 </script>
 
 <style scoped>
     .games-swiper {
         padding: 10px 6px 40px;
+    }
+    /* GPU & paint optimization for smoother dragging */
+    .games-swiper :deep(.swiper-wrapper) {
+        will-change: transform;
+    }
+    .games-swiper :deep(.swiper-slide) {
+        will-change: transform;
+        backface-visibility: hidden;
+        transform: translateZ(0);
+        width: 250px; /* fixed width for slidesPerView 'auto' to stabilize layout & momentum */
+    }
+    @media (min-width: 576px) {
+        .games-swiper :deep(.swiper-slide) {
+            width: 260px;
+        }
+    }
+    @media (min-width: 992px) {
+        .games-swiper :deep(.swiper-slide) {
+            width: 270px;
+        }
     }
     .carousel-item {
         background: #141b24;
@@ -137,6 +200,9 @@
         border-radius: 18px;
         position: relative;
         height: 100%;
+        transition:
+            box-shadow 0.28s ease,
+            transform 0.28s ease;
     }
     .carousel-item .game-img {
         object-fit: cover;

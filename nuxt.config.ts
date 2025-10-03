@@ -15,6 +15,8 @@ export default defineNuxtConfig({
         '@vueuse/nuxt'
     ],
     css: [
+        // Utilities extracted from original static template (spacing, gap, display)
+        '~/assets/css/gameplex-utilities.css',
         '~/assets/css/main.css',
         '~/assets/css/gameplex-style.css',
         'aos/dist/aos.css'

@@ -674,8 +674,9 @@ ul li {
 .box-style::before {
     content: '';
     position: absolute;
-    top: var(--x);
-    left: var(--y);
+    /* Use CSS vars injected by effects plugin: --x (horizontal), --y (vertical) */
+    left: var(--x, 50%);
+    top: var(--y, 50%);
     transform: translate(-50%, -50%);
     transition: all 0.7s ease;
     background: rgb(var(--p1));
@@ -683,6 +684,8 @@ ul li {
     width: 0;
     height: 0;
     z-index: -1;
+    pointer-events: none;
+    will-change: width, height;
 }
 .box-style:hover::before {
     width: 200%;
@@ -780,9 +783,7 @@ ul li {
     border: 1px dashed rgb(var(--p1));
     z-index: -1;
 }
-.swiper-btn.box-style {
-    border: unset;
-}
+/* Removed border:unset override so box-style border + dashed layer both visible for nav buttons */
 @media (max-width: 767px) {
     .swiper-btn {
         width: 40px;
@@ -2004,6 +2005,38 @@ ul li {
     border: 1px solid rgb(var(--n3));
     background: rgb(var(--n4));
     transition: all 0.3s ease-in-out;
+}
+/* Ensure multiple slides are visible with slidesPerView:auto.
+   Original static build relied on intrinsic widths; here we constrain for consistency */
+/* Fix: prevent swiper from overflowing row gutter system */
+.top-player-section .row > .col {
+    overflow-x: hidden; /* clip horizontal overflow from swiper */
+}
+.top-player-section .swiper-top-player {
+    max-width: 100%; /* ensure swiper stays within col bounds */
+}
+.top-player-section .swiper-top-player .swiper-slide {
+    width: auto !important; /* allow content-based sizing */
+}
+.top-player-section .swiper-top-player.top-player-overflow-guard {
+    overflow: hidden; /* prevent slide overflow */
+    padding: 4px 2px; /* slight inward padding to mask edge partials */
+}
+.top-player-section .swiper-top-player .swiper-wrapper {
+    align-items: stretch;
+}
+.top-player-section .swiper-top-player .swiper-slide .player-card {
+    width: 240px; /* tuned width to fit more slides without overflow */
+}
+@media (min-width: 1600px) {
+    .top-player-section .swiper-top-player .swiper-slide .player-card {
+        width: 260px;
+    }
+}
+@media (max-width: 575.98px) {
+    .top-player-section .swiper-top-player .swiper-slide .player-card {
+        width: 220px;
+    }
 }
 .top-player-section .swiper-top-player .swiper-slide .player-card .player-img {
     width: 62px;
