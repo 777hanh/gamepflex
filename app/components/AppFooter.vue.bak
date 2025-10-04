@@ -1,0 +1,298 @@
+<template>
+    <footer class="footer bgn-4 bt" id="footer">
+        <div class="container">
+            <div class="row justify-content-between">
+                <div
+                    class="col-lg-3 col-sm-6 br py-lg-20 pt-sm-15 pt-10 footer-card-area"
+                    data-footer-col
+                >
+                    <div class="py-lg-10">
+                        <div class="footer-logo mb-8">
+                            <NuxtLink to="/" class="d-grid gap-6">
+                                <div class="flogo-1">
+                                    <NuxtImg
+                                        src="/assets/img/logo2.png"
+                                        alt="favicon"
+                                        class="w-100"
+                                    />
+                                </div>
+                                <div class="flogo-2">
+                                    <NuxtImg
+                                        src="/assets/img/logo.png"
+                                        alt="logo"
+                                        class="w-100"
+                                    />
+                                </div>
+                            </NuxtLink>
+                        </div>
+                        <div class="social-links">
+                            <ul
+                                class="d-flex align-items-center gap-3 flex-wrap"
+                            >
+                                <li>
+                                    <a href="#" aria-label="Facebook"
+                                        ><i class="ti ti-brand-facebook fs-2xl"
+                                    /></a>
+                                </li>
+                                <li>
+                                    <a href="#" aria-label="Twitter"
+                                        ><i class="ti ti-brand-twitter fs-2xl"
+                                    /></a>
+                                </li>
+                                <li>
+                                    <a href="#" aria-label="YouTube"
+                                        ><i class="ti ti-brand-youtube fs-2xl"
+                                    /></a>
+                                </li>
+                                <li>
+                                    <a href="#" aria-label="LinkedIn"
+                                        ><i class="ti ti-brand-linkedin fs-2xl"
+                                    /></a>
+                                </li>
+                                <li>
+                                    <a href="#" aria-label="Instagram"
+                                        ><i
+                                            class="ti ti-brand-instagram fs-2xl"
+                                    /></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="col-lg-3 col-sm-6 br br-res py-lg-20 pt-sm-15 pt-10 footer-card-area"
+                    data-footer-col
+                >
+                    <div
+                        class="footer-block accordion-block"
+                        :class="{ 'is-open': openIndex === 1 }"
+                    >
+                        <button
+                            class="footer-title btn-reset d-flex justify-content-between align-items-center mb-4 w-100"
+                            @click="toggle(1)"
+                        >
+                            <span>Quick Links</span
+                            ><i
+                                class="i-tabler-chevron-down toggle-icon ms-2"
+                            />
+                        </button>
+                        <ul class="footer-list d-grid list-unstyled gap-2">
+                            <li>
+                                <NuxtLink
+                                    to="/tournaments"
+                                    class="footer-link d-flex align-items-center"
+                                    ><i
+                                        class="i-tabler-chevron-right me-2"
+                                    />Tournaments</NuxtLink
+                                >
+                            </li>
+                            <li>
+                                <NuxtLink
+                                    to="/games"
+                                    class="footer-link d-flex align-items-center"
+                                    ><i
+                                        class="i-tabler-chevron-right me-2"
+                                    />Games</NuxtLink
+                                >
+                            </li>
+                            <li>
+                                <NuxtLink
+                                    to="/teams"
+                                    class="footer-link d-flex align-items-center"
+                                    ><i
+                                        class="i-tabler-chevron-right me-2"
+                                    />Teams</NuxtLink
+                                >
+                            </li>
+                            <li>
+                                <NuxtLink
+                                    to="/faq"
+                                    class="footer-link d-flex align-items-center"
+                                    ><i
+                                        class="i-tabler-chevron-right me-2"
+                                    />FAQ</NuxtLink
+                                >
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 footer-card-area" data-footer-col>
+                    <div
+                        class="footer-block accordion-block"
+                        :class="{ 'is-open': openIndex === 2 }"
+                    >
+                        <button
+                            class="footer-title btn-reset d-flex justify-content-between align-items-center mb-4 w-100"
+                            @click="toggle(2)"
+                        >
+                            <span>Explore</span
+                            ><i
+                                class="i-tabler-chevron-down toggle-icon ms-2"
+                            />
+                        </button>
+                        <ul class="footer-list d-grid list-unstyled gap-2">
+                            <li>
+                                <NuxtLink
+                                    to="/top-players"
+                                    class="footer-link d-flex align-items-center"
+                                    ><i
+                                        class="i-tabler-chevron-right me-2"
+                                    />Top Players</NuxtLink
+                                >
+                            </li>
+                            <li>
+                                <NuxtLink
+                                    to="/chat"
+                                    class="footer-link d-flex align-items-center"
+                                    ><i
+                                        class="i-tabler-chevron-right me-2"
+                                    />Messages</NuxtLink
+                                >
+                            </li>
+                            <li>
+                                <NuxtLink
+                                    to="/profile"
+                                    class="footer-link d-flex align-items-center"
+                                    ><i
+                                        class="i-tabler-chevron-right me-2"
+                                    />Profile</NuxtLink
+                                >
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 footer-card-area" data-footer-col>
+                    <div
+                        class="footer-block accordion-block"
+                        :class="{ 'is-open': openIndex === 3 }"
+                    >
+                        <button
+                            class="footer-title btn-reset d-flex justify-content-between align-items-center mb-4 w-100"
+                            @click="toggle(3)"
+                        >
+                            <span>Follow Us</span
+                            ><i
+                                class="i-tabler-chevron-down toggle-icon ms-2"
+                            />
+                        </button>
+                        <ul class="footer-list d-grid list-unstyled gap-2">
+                            <li>
+                                <a
+                                    href="#"
+                                    class="footer-link d-flex align-items-center"
+                                    ><i
+                                        class="i-tabler-chevron-right me-2"
+                                    />Facebook</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href="#"
+                                    class="footer-link d-flex align-items-center"
+                                    ><i
+                                        class="i-tabler-chevron-right me-2"
+                                    />Instagram</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href="#"
+                                    class="footer-link d-flex align-items-center"
+                                    ><i
+                                        class="i-tabler-chevron-right me-2"
+                                    />Twitter</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href="#"
+                                    class="footer-link d-flex align-items-center"
+                                    ><i
+                                        class="i-tabler-chevron-right me-2"
+                                    />LinkedIn</a
+                                >
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="row justify-content-between g-2 footer-bottom-line pt-4 pb-3"
+            >
+                <div
+                    class="col-xl-4 col-lg-6 order-lg-first small text-muted order-last"
+                >
+                    <span
+                        >&copy; {{ new Date().getFullYear() }} GamePlex |
+                        Designed concept inspired by Pixelaxis</span
+                    >
+                </div>
+                <div class="col-xl-3 col-lg-5">
+                    <ul
+                        class="d-flex align-items-center gap-lg-4 list-unstyled footer-legal m-0 flex-wrap gap-3"
+                    >
+                        <li>
+                            <NuxtLink to="/terms">Terms & Conditions</NuxtLink>
+                        </li>
+                        <li>
+                            <NuxtLink to="/privacy">Privacy Policy</NuxtLink>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-banner-img" id="footer-banner">
+            <NuxtImg
+                src="/assets/img/fbanner.png"
+                alt="footer banner"
+                width="1200"
+                height="360"
+            />
+        </div>
+    </footer>
+</template>
+
+<script setup lang="ts">
+    import { onMounted, ref } from 'vue';
+    import { gsap } from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    if (import.meta.client) gsap.registerPlugin(ScrollTrigger);
+    const openIndex = ref<number | null>(null);
+    function toggle(i: number) {
+        if (window.innerWidth >= 992) return; // only accordion on mobile/tablet
+        openIndex.value = openIndex.value === i ? null : i;
+    }
+    onMounted(() => {
+        if (!import.meta.client) return;
+        const prefersReduced = window.matchMedia(
+            '(prefers-reduced-motion: reduce)'
+        ).matches;
+        if (prefersReduced) return;
+
+        // Wait for GSAP ScrollTrigger to be initialized
+        setTimeout(() => {
+            const footer = document.getElementById('footer');
+            if (!footer) return;
+
+            const cols = gsap.utils.toArray('[data-footer-col]');
+
+            gsap.from(cols, {
+                opacity: 0,
+                y: 28,
+                stagger: 0.15,
+                duration: 0.7,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: footer,
+                    start: 'top 85%',
+                    markers: false
+                }
+            });
+        }, 300);
+    });
+</script>
+
+<style scoped>
+    /* Footer styles are in gameplex-style.css */
+    /* This keeps the component clean and uses global footer styles */
+</style>
