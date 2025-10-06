@@ -67,10 +67,10 @@
             </div>
             <div class="swiper-btn-area d-center gap-6">
                 <div class="swiper-btn swiper-3d-button-prev box-style">
-                    <i class="ti ti-chevron-left fs-xl"></i>
+                    <ChevronLeft class="fs-xl" />
                 </div>
                 <div class="swiper-btn swiper-3d-button-next box-style">
-                    <i class="ti ti-chevron-right fs-xl"></i>
+                    <ChevronRight class="fs-xl" />
                 </div>
             </div>
         </div>
@@ -79,6 +79,8 @@
 </template>
 
 <script setup lang="ts">
+    import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
+
     // Static slide list replicating repeated pattern; duplicate sequence to maintain loop density
     const slides = [
         { img: 'assets/img/slide-3d-1.png', title: 'Apex Legends' },

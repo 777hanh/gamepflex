@@ -18,10 +18,7 @@
                         @click="isMenuOpen = !isMenuOpen"
                     />
                     <NuxtLink to="/" class="flex items-center gap-2">
-                        <UIcon
-                            name="i-tabler-brand-game"
-                            class="text-primary text-2xl"
-                        />
+                        <Gamepad2 class="text-primary text-2xl" />
                         <span class="text-xl font-bold">GamePlex</span>
                     </NuxtLink>
                 </div>
@@ -220,6 +217,8 @@
     import { ref, onMounted, onBeforeUnmount } from 'vue';
     import { gsap } from 'gsap';
     import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+    import { Gamepad2 } from 'lucide-vue-next';
 
     gsap.registerPlugin(ScrollTrigger);
     const isMenuOpen = ref(false);
