@@ -21,10 +21,8 @@
 <script setup lang="ts">
     import { storeToRefs } from 'pinia';
     import { useLoadingStore } from '~/stores/loading';
-    import { onMounted, onBeforeUnmount, ref } from 'vue';
+    import { onMounted, ref } from 'vue';
     import gsap from 'gsap';
-    import AOS from 'aos';
-    import 'aos/dist/aos.css';
 
     const loadingStore = useLoadingStore();
     const { isLoading } = storeToRefs(loadingStore);
@@ -49,32 +47,24 @@
     // Cung cấp các phương thức thông báo cho các component khác
     provide('notification', notificationMethods);
 
-    // Khởi tạo các animation
-    // tracking array reserved for future dynamic triggers (cleared on unmount)
-    // using underscore prefix to satisfy unused var rule until populated
-    let _scrollTriggers: any[] = [];
+    // REMOVED: Duplicate AOS/GSAP init - đã có trong plugins
+    // Plugins sẽ tự động init, không cần init lại ở đây
+
     onMounted(() => {
+        // Chỉ giữ lại minimal setup
         const prefersReduced = window.matchMedia(
             '(prefers-reduced-motion: reduce)'
         ).matches;
-        // AOS init guarded
-        AOS.init({
-            duration: 700,
-            easing: 'ease-out-cubic',
-            once: true,
-            offset: 90,
-            delay: 80
-        });
-        gsap.config({ nullTargetWarn: false });
+
         if (!prefersReduced) {
+            // Simple fade-in cho page content
             gsap.fromTo(
                 '.fade-in',
-                { opacity: 0, y: 24 },
+                { opacity: 0, y: 20 },
                 {
                     opacity: 1,
                     y: 0,
-                    duration: 0.7,
-                    stagger: 0.08,
+                    duration: 0.5,
                     ease: 'power2.out'
                 }
             );
@@ -82,11 +72,7 @@
     });
 
     onBeforeUnmount(() => {
-        // cleanup scroll triggers if any future registered
-        if ((gsap as any).ScrollTrigger) {
-            (gsap as any).ScrollTrigger.getAll().forEach((t: any) => t.kill());
-        }
-        _scrollTriggers = [];
+        // Cleanup không cần thiết - ScrollTrigger tự quản lý
     });
 </script>
 

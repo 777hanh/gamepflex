@@ -1,16 +1,16 @@
 <template>
     <div>
-        <HeroSection id="hero" />
+        <!-- <HeroSection id="hero" /> -->
         <!-- Raw cloned 3D swiper (phase 2 verification) -->
-        <Swiper3DRaw />
-        <FeaturedGames id="featured-games" :games="featuredGames" />
-        <HomeNetflixCarousel id="netflix-carousel" />
+        <!-- <Swiper3DRaw /> -->
+        <!-- <FeaturedGames id="featured-games" :games="featuredGames" /> -->
+        <!-- <HomeNetflixCarousel id="netflix-carousel" /> -->
         <!-- Raw cloned Top Players (phase 2 verification) -->
-        <TopPlayersRaw />
-        <LiveTournaments id="tournaments" :tournaments="liveTournaments" />
-        <GamesCarousel id="games-carousel" :games="featuredGames" />
-        <TopTeams id="top-teams" :teams="topTeams" />
-        <CallToAction id="cta" />
+        <!-- <TopPlayersRaw /> -->
+        <!-- <LiveTournaments id="tournaments" :tournaments="liveTournaments" /> -->
+        <!-- <GamesCarousel id="games-carousel" :games="featuredGames" /> -->
+        <!-- <TopTeams id="top-teams" :teams="topTeams" /> -->
+        <!-- <CallToAction id="cta" /> -->
     </div>
 </template>
 

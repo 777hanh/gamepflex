@@ -2,48 +2,24 @@
 // Supports: fade-up, fade-down, fade-left, fade-right, zoom-in, zoom-out
 // Attributes: data-gsap, data-gsap-duration, data-gsap-delay
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 export default defineNuxtPlugin((nuxtApp) => {
     if (!import.meta.client) return;
 
     const initGSAPAnimations = () => {
-        console.log(
-            '[GSAP Animations] Initializing scroll-triggered animations...'
-        );
-
-        // AUTO MODE: Find elements with data-gsap attribute
+        // OPTIMIZED: Chỉ animate manual elements để giảm lag
         const manualElements = document.querySelectorAll('[data-gsap]');
 
-        // AUTO MODE: Also animate common elements automatically (like AOS)
-        // Select elements that should fade in: cards, items, sections with specific classes
-        const autoSelectors = [
-            '.tournament-card',
-            '.team-card',
-            '.player-card',
-            '.game-card',
-            '.member-card',
-            '.achievement-item',
-            '.stat-item',
-            '.profile-header',
-            '.featured-team',
-            '[class*="-card"]:not(.swiper-slide)', // Any class ending with -card except swiper slides
-            '[class*="-item"]:not(.swiper-slide)' // Any class ending with -item except swiper slides
-        ].join(', ');
+        // REMOVED: Auto selectors - gây lag khi quét toàn bộ DOM
+        // AOS sẽ xử lý phần này tốt hơn với once:true
 
-        const autoElements = document.querySelectorAll(autoSelectors);
-
-        // Combine manual and auto elements, remove duplicates
-        const allElements = new Set([...manualElements, ...autoElements]);
+        const allElements = new Set([...manualElements]);
 
         if (allElements.size === 0) {
-            console.log('[GSAP Animations] No elements found to animate');
             return;
         }
 
-        console.log(
-            `[GSAP Animations] Found ${manualElements.length} manual + ${autoElements.length} auto = ${allElements.size} total elements to animate`
-        );
+        console.log(`[GSAP Animations] Animating ${allElements.size} elements`);
 
         allElements.forEach((el) => {
             const element = el as HTMLElement;
@@ -97,6 +73,8 @@ export default defineNuxtPlugin((nuxtApp) => {
             const config =
                 animationConfigs[animation] || animationConfigs['fade-up'];
 
+            if (!config) return;
+
             // Set initial state
             gsap.set(element, config.from);
 
@@ -108,10 +86,11 @@ export default defineNuxtPlugin((nuxtApp) => {
                 ease: 'power2.out',
                 scrollTrigger: {
                     trigger: element,
-                    start: 'top 90%', // Start animation when element is 90% from top of viewport
+                    start: 'top 90%',
                     end: 'top 20%',
-                    toggleActions: 'play none none reverse', // Play on enter, reverse on leave (scroll up)
-                    markers: false // Set to true for debugging
+                    toggleActions: 'play none none reverse',
+                    markers: false,
+                    once: false
                 }
             });
         });
@@ -119,67 +98,34 @@ export default defineNuxtPlugin((nuxtApp) => {
         console.log('[GSAP Animations] Animation setup complete');
     };
 
-    // Retry logic for elements that might not be rendered yet
-    let retryCount = 0;
-    const maxRetries = 5;
-
+    // OPTIMIZED: Simple init without retry
     const tryInit = () => {
-        retryCount++;
-        console.log(`[GSAP Animations] Attempt ${retryCount}/${maxRetries}`);
-
-        // Check for any animatable elements (manual or auto)
-        const manualElements = document.querySelectorAll('[data-gsap]');
-        const autoElements = document.querySelectorAll(
-            '.tournament-card, .team-card, .player-card, .game-card'
-        );
-
-        if (
-            manualElements.length === 0 &&
-            autoElements.length === 0 &&
-            retryCount < maxRetries
-        ) {
-            console.log(
-                '[GSAP Animations] No elements found, retrying in 300ms...'
-            );
-            setTimeout(tryInit, 300);
-            return;
+        const hasElements = document.querySelector('[data-gsap]');
+        if (hasElements) {
+            initGSAPAnimations();
         }
-
-        initGSAPAnimations();
     };
 
-    // Initialize after DOM is ready
+    // Initialize after minimal delay
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(tryInit, 500);
-        });
+        document.addEventListener(
+            'DOMContentLoaded',
+            () => setTimeout(tryInit, 100),
+            { once: true }
+        );
     } else {
-        setTimeout(tryInit, 500);
+        setTimeout(tryInit, 100);
     }
 
-    // Re-initialize on page navigation
+    // Re-initialize on page navigation - OPTIMIZED
     nuxtApp.hook('page:finish', () => {
-        retryCount = 0;
         setTimeout(() => {
-            // Clean up old ScrollTriggers for animated elements
-            ScrollTrigger.getAll().forEach((trigger) => {
-                const triggerEl = trigger.vars.trigger as HTMLElement;
-                if (
-                    triggerEl &&
-                    (triggerEl.hasAttribute('data-gsap') ||
-                        triggerEl.dataset.gsapAnimated === 'true')
-                ) {
-                    trigger.kill();
-                }
-            });
-
             // Reset animated flags
             document.querySelectorAll('[data-gsap-animated]').forEach((el) => {
                 delete (el as HTMLElement).dataset.gsapAnimated;
             });
 
-            ScrollTrigger.refresh();
             tryInit();
-        }, 500);
+        }, 100);
     });
 });

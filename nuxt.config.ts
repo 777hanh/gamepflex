@@ -1,6 +1,6 @@
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
-    devtools: { enabled: true },
+    devtools: { enabled: false }, // OPTIMIZED: Disable in production
     future: {
         compatibilityVersion: 4
     },
@@ -15,9 +15,9 @@ export default defineNuxtConfig({
         '@vueuse/nuxt'
     ],
     css: [
-        // Utilities extracted from original static template (spacing, gap, display)
-        '~/assets/css/gameplex-utilities.css',
+        // OPTIMIZED: Load in priority order
         '~/assets/css/main.css',
+        '~/assets/css/gameplex-utilities.css',
         '~/assets/css/gameplex-style.css',
         'aos/dist/aos.css'
     ],
@@ -73,10 +73,21 @@ export default defineNuxtConfig({
     },
     vite: {
         build: {
-            sourcemap: false
+            sourcemap: false,
+            cssCodeSplit: true, // Split CSS for better caching
+            minify: 'terser',
+            terserOptions: {
+                compress: {
+                    drop_console: true, // Remove console.logs in production
+                    drop_debugger: true
+                }
+            }
         },
         css: {
             devSourcemap: false
+        },
+        optimizeDeps: {
+            include: ['gsap', 'aos', 'swiper'] // Pre-bundle heavy deps
         }
     }
 });

@@ -30,18 +30,20 @@ export default defineNuxtPlugin(() => {
         }
     };
 
-    // Delay init để đảm bảo Swiper & dynamic components đã render xong
+    // OPTIMIZED: Giảm delay
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(initTilt, 300);
-        });
+        document.addEventListener(
+            'DOMContentLoaded',
+            () => setTimeout(initTilt, 100),
+            { once: true }
+        );
     } else {
-        setTimeout(initTilt, 300);
+        setTimeout(initTilt, 100);
     }
 
-    // Re-init sau mỗi route change (cho dynamic content)
+    // Re-init sau route change - OPTIMIZED
     const nuxtApp = useNuxtApp();
     nuxtApp.hook('page:finish', () => {
-        setTimeout(initTilt, 200);
+        setTimeout(initTilt, 100);
     });
 });

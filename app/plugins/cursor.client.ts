@@ -6,19 +6,24 @@ export default defineNuxtPlugin(() => {
     const cursor = document.querySelector<HTMLElement>('.cursor');
     if (!cursor) return;
 
-    // Ensure base positioning uses left/top so transform is free for scale classes
-    cursor.style.willChange = 'left, top, transform';
+    // GPU acceleration for sharp rendering at all scales
+    cursor.style.willChange = 'transform';
+    cursor.style.backfaceVisibility = 'hidden';
+    cursor.style.webkitBackfaceVisibility = 'hidden';
+    cursor.style.perspective = '1000px';
 
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
 
-    // Keep a continuous loop (lighter than mousemove paints) so we never need a click to resume.
-    // We only gate visual updates with a 'paused' flag but still keep rAF chain alive.
+    // Use transform for better performance and sharpness
     let paused = false;
+    let currentScale = 1;
+
     const loop = () => {
         if (!paused) {
-            cursor.style.left = mouseX + 'px';
-            cursor.style.top = mouseY + 'px';
+            // Use translate3d with centered offset for sharp rendering
+            // Separate translate and scale for better rendering quality
+            cursor.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%) translateZ(0) scale(${currentScale})`;
         }
         requestAnimationFrame(loop);
     };
@@ -42,10 +47,22 @@ export default defineNuxtPlugin(() => {
     const applyFor = (el: Element) => {
         if (!el.classList.contains('cursor-scale')) return;
         resetClasses();
-        if (el.classList.contains('growUp')) cursor.classList.add(BIG);
-        else if (el.classList.contains('growDown')) cursor.classList.add(SMALL);
-        else if (el.classList.contains('growDown2'))
+        // Apply scale classes for sharp rendering
+        if (el.classList.contains('growUp')) {
+            cursor.classList.add(BIG);
+            currentScale = 7;
+        } else if (el.classList.contains('growDown')) {
+            cursor.classList.add(SMALL);
+            currentScale = 4;
+        } else if (el.classList.contains('growDown2')) {
             cursor.classList.add(SMALL2);
+            currentScale = 2;
+        }
+    };
+
+    const resetClassesWithScale = () => {
+        resetClasses();
+        currentScale = 1;
     };
 
     // Delegate events instead of binding to every element (better for dynamic content)
@@ -61,7 +78,7 @@ export default defineNuxtPlugin(() => {
         const target = e.target as HTMLElement | null;
         if (!target) return;
         if (target.closest('.cursor-scale')) {
-            resetClasses();
+            resetClassesWithScale();
         }
     });
 
@@ -76,7 +93,7 @@ export default defineNuxtPlugin(() => {
     // Some browsers stop rAF automatically, but we explicitly pause to avoid unnecessary work
     const pause = () => {
         paused = true;
-        resetClasses();
+        resetClassesWithScale();
         cursor.style.opacity = '0';
     };
     const resume = () => {

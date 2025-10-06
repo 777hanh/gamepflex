@@ -2,7 +2,8 @@
 // Using SplitText plugin with exact same config as static HTML
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-// @ts-expect-error - SplitText is GSAP Club plugin
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - SplitText is GSAP Club plugin
 import { SplitText } from 'gsap/SplitText';
 
 export default defineNuxtPlugin(() => {
@@ -70,21 +71,20 @@ export default defineNuxtPlugin(() => {
         }
     };
 
-    // Delay init để đảm bảo DOM đã render xong
+    // OPTIMIZED: Giảm delay
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(initTextAnimations, 200);
-        });
+        document.addEventListener(
+            'DOMContentLoaded',
+            () => setTimeout(initTextAnimations, 100),
+            { once: true }
+        );
     } else {
-        setTimeout(initTextAnimations, 200);
+        setTimeout(initTextAnimations, 100);
     }
 
-    // Re-init sau mỗi route change (cho dynamic content)
+    // Re-init sau route change - OPTIMIZED
     const nuxtApp = useNuxtApp();
     nuxtApp.hook('page:finish', () => {
-        setTimeout(() => {
-            ScrollTrigger.refresh();
-            initTextAnimations();
-        }, 300);
+        setTimeout(initTextAnimations, 100);
     });
 });

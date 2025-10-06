@@ -7,6 +7,7 @@ import SplitText from 'gsap/SplitText';
 
 export default defineNuxtPlugin(() => {
     if (!import.meta.client) return;
+
     // Register core plugins asap (file name ensures early load)
     gsap.registerPlugin(ScrollTrigger);
     if (SplitText) {
@@ -17,12 +18,17 @@ export default defineNuxtPlugin(() => {
         }
     }
 
-    // ScrollTrigger config for better performance
+    // ScrollTrigger config - OPTIMIZED for performance
     ScrollTrigger.config({
-        autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load'
+        autoRefreshEvents: 'visibilitychange', // Chỉ refresh khi tab visible
+        limitCallbacks: true // Giới hạn callbacks để tăng performance
     });
 
-    console.log(
-        '[GSAP Init] ScrollTrigger registered and configured for window scroll'
-    );
+    // GSAP performance settings
+    gsap.config({
+        nullTargetWarn: false,
+        force3D: true // Sử dụng GPU acceleration
+    });
+
+    console.log('[GSAP Init] Optimized configuration loaded');
 });

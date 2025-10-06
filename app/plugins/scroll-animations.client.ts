@@ -12,14 +12,10 @@ export default defineNuxtPlugin((nuxtApp) => {
 
         console.log('[Scroll Animations] Initializing...');
 
-        // 07 -> footer banner animation (clone from original)
+        // 07 -> footer banner animation - OPTIMIZED
         const footerBanner =
             document.querySelector<HTMLElement>('.footer-banner-img');
         if (footerBanner) {
-            console.log(
-                '[Scroll Animations] Footer banner found:',
-                footerBanner
-            );
             gsap.to(footerBanner, {
                 right: '0%',
                 left: 'unset',
@@ -30,19 +26,17 @@ export default defineNuxtPlugin((nuxtApp) => {
                     trigger: '#cta',
                     start: 'top center',
                     end: 'bottom center',
-                    scrub: true,
-                    markers: false
+                    scrub: 1,
+                    markers: false,
+                    invalidateOnRefresh: true
                 }
             });
-        } else {
-            console.log('[Scroll Animations] Footer banner NOT found');
         }
 
-        // 08 -> sword animation (clone from original: 2 scenes)
+        // 08 -> sword animation - OPTIMIZED
         const swordArea = document.querySelector<HTMLElement>('.sword-area');
         if (swordArea) {
-            console.log('[Scroll Animations] Sword found:', swordArea);
-            // Scene 1: sword moves in when #swiper-3d appears
+            // Scene 1: sword moves in
             gsap.to(swordArea, {
                 right: 'unset',
                 left: '0%',
@@ -53,31 +47,30 @@ export default defineNuxtPlugin((nuxtApp) => {
                     trigger: '#swiper-3d',
                     start: 'top center',
                     end: '+=1000',
-                    scrub: true,
-                    markers: false
+                    scrub: 1,
+                    markers: false,
+                    invalidateOnRefresh: true
                 }
             });
 
-            // Scene 2: sword rotates 180deg when #top-player appears
+            // Scene 2: sword rotates
             gsap.to(swordArea, {
                 rotate: '180deg',
                 scrollTrigger: {
                     trigger: '#top-player',
                     start: 'top center',
                     end: '+=100',
-                    scrub: true,
-                    markers: false
+                    scrub: 1,
+                    markers: false,
+                    invalidateOnRefresh: true
                 }
             });
-        } else {
-            console.log('[Scroll Animations] Sword NOT found');
         }
 
-        // 09 -> diamond animation
+        // 09 -> diamond animation - OPTIMIZED
         const diamondArea =
             document.querySelector<HTMLElement>('.diamond-area');
         if (diamondArea) {
-            console.log('[Scroll Animations] Diamond found:', diamondArea);
             gsap.to(diamondArea, {
                 top: '80%',
                 opacity: 1,
@@ -85,19 +78,17 @@ export default defineNuxtPlugin((nuxtApp) => {
                     trigger: '#tournament-hero',
                     start: 'top center',
                     end: '+=1000',
-                    scrub: true,
-                    markers: false
+                    scrub: 1,
+                    markers: false,
+                    invalidateOnRefresh: true
                 }
             });
-        } else {
-            console.log('[Scroll Animations] Diamond NOT found');
         }
 
-        // 10 -> game console animation
+        // 10 -> game console animation - OPTIMIZED
         const gameConsole =
             document.querySelector<HTMLElement>('.game-console-area');
         if (gameConsole) {
-            console.log('[Scroll Animations] Game console found:', gameConsole);
             gsap.to(gameConsole, {
                 top: '80%',
                 left: 'unset',
@@ -107,66 +98,32 @@ export default defineNuxtPlugin((nuxtApp) => {
                     trigger: '#tournament-hero',
                     start: 'top center',
                     end: '+=1000',
-                    scrub: true,
-                    markers: false
+                    scrub: 1,
+                    markers: false,
+                    invalidateOnRefresh: true
                 }
             });
-        } else {
-            console.log('[Scroll Animations] Game console NOT found');
         }
     };
 
-    // Retry logic for elements that might not be rendered yet
-    let retryCount = 0;
-    const maxRetries = 5;
-
+    // OPTIMIZED: Simple init without complex retry
     const tryInit = () => {
-        retryCount++;
-        console.log(`[Scroll Animations] Attempt ${retryCount}/${maxRetries}`);
-
-        // Check if critical elements exist
-        const swordArea = document.querySelector('.sword-area');
-        const diamondArea = document.querySelector('.diamond-area');
-        const swiperSection = document.getElementById('swiper-3d');
-        const tournamentSection = document.getElementById('tournament-hero');
-
-        console.log('[Scroll Animations] Elements check:', {
-            swordArea: !!swordArea,
-            diamondArea: !!diamondArea,
-            swiperSection: !!swiperSection,
-            tournamentSection: !!tournamentSection
-        });
-
-        if (!swordArea || !swiperSection) {
-            if (retryCount < maxRetries) {
-                console.log('[Scroll Animations] Retrying in 500ms...');
-                setTimeout(tryInit, 500);
-                return;
-            } else {
-                console.warn(
-                    '[Scroll Animations] Max retries reached, initializing anyway'
-                );
-            }
-        }
-
         initScrollAnimations();
     };
 
-    // Initialize after DOM is ready and other plugins have loaded
+    // Initialize faster
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(tryInit, 1000); // Increased delay for Swiper init
-        });
+        document.addEventListener(
+            'DOMContentLoaded',
+            () => setTimeout(tryInit, 200),
+            { once: true }
+        );
     } else {
-        setTimeout(tryInit, 1000); // Increased delay for Swiper init
+        setTimeout(tryInit, 200);
     }
 
-    // Re-initialize on page navigation
+    // Re-initialize on page navigation - OPTIMIZED
     nuxtApp.hook('page:finish', () => {
-        retryCount = 0; // Reset retry count
-        setTimeout(() => {
-            ScrollTrigger.refresh();
-            tryInit();
-        }, 1000);
+        setTimeout(tryInit, 200);
     });
 });

@@ -43,7 +43,9 @@
                         </h1>
                         <a
                             href="https://www.youtube.com/watch?v=G5kzUpWAusI"
-                            class="drag-none btn-half-border bgp-1 popupvideo mfp-iframe relative flex rounded-full px-4! py-3! select-none"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="drag-none btn-half-border bgp-1 relative flex rounded-full px-4! py-3! select-none"
                             >Play Now</a
                         >
                     </div>
