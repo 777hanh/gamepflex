@@ -116,6 +116,7 @@
                                                                     0
                                                             )
                                                         "
+                                                        fill="currentColor"
                                                         class="fs-sm"
                                                     />
                                                     <Star
@@ -126,6 +127,7 @@
                                                             0.5
                                                         "
                                                         class="fs-sm"
+                                                        fill="currentColor"
                                                         style="
                                                             clip-path: inset(
                                                                 0 50% 0 0
@@ -134,9 +136,8 @@
                                                     />
                                                     <Star
                                                         v-else
-                                                        fill="#f00"
                                                         class="fs-sm"
-                                                        style="opacity: 0.3"
+                                                        style="opacity: 0.7"
                                                     />
                                                 </li>
                                             </ul>
@@ -220,7 +221,7 @@
             id: 1,
             name: 'Jane Cooper',
             role: 'Duelist',
-            img: 'assets/img/top-player1.png',
+            img: 'assets/img/avatar1.png',
             rank: 1,
             region: 'EUW',
             team: 'fire',
@@ -230,7 +231,7 @@
             id: 2,
             name: 'Savannah Nguyen',
             role: 'Duelist',
-            img: 'assets/img/top-player2.png',
+            img: 'assets/img/avatar2.png',
             rank: 2,
             region: 'EUW',
             team: 'lft',
@@ -240,7 +241,7 @@
             id: 3,
             name: 'Guy Hawkins',
             role: 'Duelist',
-            img: 'assets/img/top-player3.png',
+            img: 'assets/img/avatar3.png',
             rank: 3,
             region: 'EUW',
             team: 'liquid',
