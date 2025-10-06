@@ -3,7 +3,7 @@
     <section class="top-player-section pt-120 pb-120" id="top-player">
         <!-- sword animation -->
         <div class="sword-area">
-            <img class="w-100" src="assets/img/sword.png" alt="sword" />
+            <img class="w-80" src="assets/img/sword.png" alt="sword" />
         </div>
         <div class="red-ball end-0"></div>
         <div class="container">
@@ -23,13 +23,13 @@
                             class="swiper-btn top-player-prev box-style"
                             data-ripple-center
                         >
-                            <i class="ti ti-chevron-left fs-xl"></i>
+                            <ChevronLeft class="fs-xl" />
                         </div>
                         <div
                             class="swiper-btn top-player-next box-style"
                             data-ripple-center
                         >
-                            <i class="ti ti-chevron-right fs-xl"></i>
+                            <ChevronRight class="fs-xl" />
                         </div>
                     </div>
                 </div>
@@ -64,10 +64,10 @@
                                                     :src="player.img"
                                                     alt="player"
                                                 />
-                                                <span
+                                                <!-- <span
                                                     class="player-status position-absolute tcn-1 fs-xs d-center end-0 bottom-0"
                                                     >{{ player.rank }}</span
-                                                >
+                                                > -->
                                             </div>
                                             <div>
                                                 <h5
@@ -84,14 +84,14 @@
                                             <button
                                                 class="follow-btn box-style"
                                             >
-                                                <i
-                                                    class="ti ti-user-plus fs-xl"
-                                                ></i>
+                                                <UserPlus
+                                                    class="fs-lg h-5 w-5"
+                                                />
                                             </button>
                                         </form>
                                     </div>
                                     <div
-                                        class="player-score-details d-flex align-items-center flex-wrap gap-3"
+                                        class="player-score-details flex flex-wrap justify-between"
                                     >
                                         <div class="score">
                                             <h6 class="score-title tcn-6 mb-2">
@@ -100,28 +100,44 @@
                                             <ul
                                                 class="d-flex align-items-center tcp-2 gap-1"
                                             >
-                                                <li>
-                                                    <i
-                                                        class="ti ti-star-filled"
-                                                    ></i>
-                                                </li>
-                                                <li>
-                                                    <i
-                                                        class="ti ti-star-filled"
-                                                    ></i>
-                                                </li>
-                                                <li>
-                                                    <i
-                                                        class="ti ti-star-filled"
-                                                    ></i>
-                                                </li>
-                                                <li>
-                                                    <i
-                                                        class="ti ti-star-half-filled"
-                                                    ></i>
-                                                </li>
-                                                <li>
-                                                    <i class="ti ti-star"></i>
+                                                <li
+                                                    v-for="n in player.stars
+                                                        ? Math.ceil(
+                                                              player.stars
+                                                          )
+                                                        : 5"
+                                                    :key="`star-${n}`"
+                                                >
+                                                    <Star
+                                                        v-if="
+                                                            n <=
+                                                            Math.floor(
+                                                                player.stars ||
+                                                                    0
+                                                            )
+                                                        "
+                                                        class="fs-sm"
+                                                    />
+                                                    <Star
+                                                        v-else-if="
+                                                            n -
+                                                                (player.stars ||
+                                                                    0) ===
+                                                            0.5
+                                                        "
+                                                        class="fs-sm"
+                                                        style="
+                                                            clip-path: inset(
+                                                                0 50% 0 0
+                                                            );
+                                                        "
+                                                    />
+                                                    <Star
+                                                        v-else
+                                                        fill="#f00"
+                                                        class="fs-sm"
+                                                        style="opacity: 0.3"
+                                                    />
                                                 </li>
                                             </ul>
                                         </div>
@@ -129,11 +145,17 @@
                                             <h6 class="rank-title tcn-6 mb-2">
                                                 Rank
                                             </h6>
-                                            <span class="tcn-1 fs-sm">
-                                                <i class="ti ti-diamond"></i>
-                                                Diamond
+                                            <span
+                                                class="tcn-1 fs-sm flex gap-1"
+                                            >
+                                                <GemIcon
+                                                    class="fs-sm h-5 w-5"
+                                                />
+                                                {{ player.rank }}
                                             </span>
                                         </div>
+                                    </div>
+                                    <div class="flex justify-between gap-6">
                                         <div class="region">
                                             <h6 class="region-title tcn-6 mb-2">
                                                 Region
@@ -171,6 +193,13 @@
     import { onMounted } from 'vue';
     import { gsap } from 'gsap';
     import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    import {
+        ChevronRight,
+        ChevronLeft,
+        UserPlus,
+        Star,
+        GemIcon
+    } from 'lucide-vue-next';
 
     if (import.meta.client) gsap.registerPlugin(ScrollTrigger);
 
@@ -183,6 +212,7 @@
         rank: number;
         region: string;
         team: string;
+        stars?: number;
     }
 
     const players: Player[] = [
@@ -193,7 +223,8 @@
             img: 'assets/img/top-player1.png',
             rank: 1,
             region: 'EUW',
-            team: 'fire'
+            team: 'fire',
+            stars: 4.5
         },
         {
             id: 2,
@@ -202,7 +233,8 @@
             img: 'assets/img/top-player2.png',
             rank: 2,
             region: 'EUW',
-            team: 'lft'
+            team: 'lft',
+            stars: 4.0
         },
         {
             id: 3,
@@ -211,20 +243,17 @@
             img: 'assets/img/top-player3.png',
             rank: 3,
             region: 'EUW',
-            team: 'liqud'
+            team: 'liquid',
+            stars: 5.0
         }
     ];
 
-    // Repeat pattern for smooth loop (4x = 12 total slides)
-    const allSlides = [
-        ...players,
-        ...players,
-        ...players,
-        ...players,
-        ...players,
-        ...players,
-        ...players
-    ];
+    // Repeat pattern for smooth loop (minimum 6 slides for loop to work with slidesPerView: 3)
+    const allSlides = computed(() => {
+        // Duplicate to ensure enough slides for loop
+        // With 3 players, repeat 3x = 9 slides (enough for slidesPerView: 3 + loop)
+        return [...players, ...players, ...players];
+    });
 
     onMounted(() => {
         if (!import.meta.client) return;
@@ -245,8 +274,6 @@
                 return;
             }
 
-            console.log('Sword element found:', swordArea);
-
             // Scene 2: Sword rotates 180deg when #top-player appears
             gsap.to(swordArea, {
                 rotate: '180deg',
@@ -261,10 +288,10 @@
                         console.log('Sword rotation animation triggered!')
                 }
             });
-        }, 300);
+        }, 150);
     });
 </script>
 
-<style scoped>
-    /* No scoped styles: global CSS handles visuals */
+<style>
+    /* Component-specific styles only - Critical Swiper styles moved back to global CSS */
 </style>

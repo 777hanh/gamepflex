@@ -2002,48 +2002,57 @@ ul li {
     }
 }
 
+/* ========== TOP PLAYER SWIPER SECTION ========== */
+/* CRITICAL: Must be in global CSS for Swiper to work properly */
+/* Swiper needs CSS loaded before initialization */
+
+.top-player-section .swiper-top-player .swiper-slide {
+    /* Swiper sets width dynamically based on slidesPerView */
+    /* DO NOT override width here! */
+    flex-shrink: 0; /* Prevent flex shrinking */
+    height: auto; /* Auto height based on content */
+    transition: opacity 0.3s ease-in-out;
+    display: flex; /* Flex container for equal height */
+}
+
 .top-player-section .swiper-top-player .swiper-slide .player-card {
+    /* Card layout */
     border-radius: 12px;
     border: 1px solid rgb(var(--n3));
     background: rgb(var(--n4));
     transition: all 0.3s ease-in-out;
+
+    /* EQUAL HEIGHT: flex: 1 makes all cards same height */
+    flex: 1; /* Stretch to fill slide height */
+    display: flex !important;
+    flex-direction: column; /* Stack children vertically */
+    width: 100%; /* Fill the slide width that Swiper calculates */
+
+    /* CRITICAL FIX: Override d-grid's display: grid !important */
+    /* Grid layout breaks Swiper's width calculation */
 }
-/* Ensure multiple slides are visible with slidesPerView:auto.
-   Original static build relied on intrinsic widths; here we constrain for consistency */
-/* Fix: prevent swiper from overflowing row gutter system */
+
+/* Container settings */
 .top-player-section .row > .col {
-    overflow-x: hidden; /* clip horizontal overflow from swiper */
+    overflow: visible;
 }
+
 .top-player-section .swiper-top-player {
-    max-width: 100%; /* ensure swiper stays within col bounds */
+    max-width: 100%;
+    overflow: visible;
 }
-.top-player-section .swiper-top-player .swiper-slide {
-    width: auto !important; /* allow content-based sizing */
-}
-.top-player-section .swiper-top-player.top-player-overflow-guard {
-    overflow: hidden; /* prevent slide overflow */
-    padding: 4px 2px; /* slight inward padding to mask edge partials */
-}
+
 .top-player-section .swiper-top-player .swiper-wrapper {
-    align-items: stretch;
+    align-items: stretch; /* Stretch all slides to same height */
+    display: flex; /* Ensure flex layout */
 }
-.top-player-section .swiper-top-player .swiper-slide .player-card {
-    width: 240px; /* tuned width to fit more slides without overflow */
-}
-@media (min-width: 1600px) {
-    .top-player-section .swiper-top-player .swiper-slide .player-card {
-        width: 260px;
-    }
-}
-@media (max-width: 575.98px) {
-    .top-player-section .swiper-top-player .swiper-slide .player-card {
-        width: 220px;
-    }
-}
+
+/* Player card children */
 .top-player-section .swiper-top-player .swiper-slide .player-card .player-img {
     width: 62px;
     height: 62px;
 }
+
 .top-player-section
     .swiper-top-player
     .swiper-slide
@@ -2061,6 +2070,7 @@ ul li {
     background: rgb(var(--p1));
     border: 2px solid rgb(var(--n0));
 }
+
 .top-player-section .swiper-top-player .swiper-slide .player-card .follow-btn {
     width: 40px;
     min-width: 40px;
@@ -2075,6 +2085,7 @@ ul li {
     transition: all 0.3s ease;
     color: rgb(var(--n6));
 }
+
 .top-player-section
     .swiper-top-player
     .swiper-slide
@@ -2083,25 +2094,9 @@ ul li {
     border-color: rgb(var(--p1));
     color: rgb(var(--n1));
 }
-.top-player-section .swiper-top-player .swiper-slide-active .player-card {
-    border: 1px solid rgb(var(--p1));
-}
-.top-player-section
-    .swiper-top-player
-    .swiper-slide-active
-    .player-card
-    .player-name {
-    color: rgb(var(--p1));
-}
-.top-player-section
-    .swiper-top-player
-    .swiper-slide-active
-    .player-card
-    .follow-btn {
-    background: rgb(var(--p1));
-    border: 0;
-    color: rgb(var(--n1));
-}
+
+/* Active slide styling - DISABLED */
+/* All cards have same appearance now */
 
 .tournament-section .tournament-wrapper {
     max-width: 1600px;

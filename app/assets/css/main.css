@@ -10,6 +10,8 @@
 /* Import main styles */
 @import './gameplex.css';
 
+@import 'swiper/swiper.css';
+
 @import 'tailwindcss';
 @import '@nuxt/ui';
 

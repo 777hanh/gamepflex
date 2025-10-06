@@ -1,132 +1,264 @@
-// Core Swiper initializations cloned from original static template (phase 1)
+// Core Swiper initializations - optimized for Swiper 12.x
 import { Swiper } from 'swiper';
 import {
     Navigation,
     Autoplay,
     EffectCoverflow,
-    FreeMode
+    Pagination
 } from 'swiper/modules';
 
-export default () => {
-    if (typeof window === 'undefined') return;
-    Swiper.use([Navigation, Autoplay, EffectCoverflow, FreeMode]);
+export default defineNuxtPlugin(() => {
+    if (!import.meta.client) return;
 
-    const initWhenReady = (selector: string, init: () => void) => {
-        if (document.querySelector(selector)) {
-            init();
+    const swipers = new Map<string, Swiper>();
+
+    const initSwiper = (selector: string, options: any) => {
+        if (swipers.has(selector)) {
+            console.log(`[Swiper] Already initialized: ${selector}`);
             return;
         }
-        const mo = new MutationObserver(() => {
-            if (document.querySelector(selector)) {
-                try {
-                    init();
-                } catch {
-                    /* silent */
+
+        const el = document.querySelector(selector);
+        if (!el) {
+            console.warn(`[Swiper] Element not found: ${selector}`);
+            return null;
+        }
+
+        try {
+            const swiper = new Swiper(selector, {
+                ...options,
+                // Critical for proper loop behavior in Swiper 12.x
+                observer: true,
+                observeParents: true,
+                observeSlideChildren: true,
+                watchOverflow: true,
+                watchSlidesProgress: true,
+                resistanceRatio: 0.85,
+                threshold: 5,
+                on: {
+                    init: function (this: Swiper) {
+                        console.log(`[Swiper] Initialized: ${selector}`, {
+                            slides: this.slides.length,
+                            slidesPerView: this.params.slidesPerView,
+                            loop: this.params.loop,
+                            realIndex: this.realIndex,
+                            loopedSlides: this.loopedSlides
+                        });
+                    },
+                    slideChange: function (this: Swiper) {
+                        console.log(`[Swiper] Slide changed: ${selector}`, {
+                            realIndex: this.realIndex,
+                            activeIndex: this.activeIndex
+                        });
+                        // Let Swiper handle active class automatically
+                        // Manual override was causing conflicts
+                    },
+                    loopFix: function (this: Swiper) {
+                        console.log(`[Swiper] Loop fix triggered: ${selector}`);
+                    },
+                    ...options.on
                 }
-                mo.disconnect();
-            }
-        });
-        mo.observe(document.documentElement, {
-            childList: true,
-            subtree: true
-        });
+            });
+
+            swipers.set(selector, swiper);
+            return swiper;
+        } catch (e) {
+            console.error(`[Swiper] Init failed for ${selector}:`, e);
+            return null;
+        }
     };
 
-    // 3D swiper
-    initWhenReady('.swiper-3d-container', () => {
-        new Swiper('.swiper-3d-container', {
-            slidesPerView: 'auto',
-            loop: true,
-            centeredSlides: true,
-            speed: 1000,
-            freeMode: true,
-            effect: 'coverflow',
-            autoplay: { delay: 3000 },
-            coverflowEffect: {
-                rotate: 1,
-                stretch: 50,
-                depth: 90,
-                modifier: 1,
-                slideShadows: false
-            },
-            navigation: {
-                prevEl: '.swiper-3d-button-prev',
-                nextEl: '.swiper-3d-button-next'
-            },
-            breakpoints: {
-                1400: { slidesPerView: 4 },
-                1024: { slidesPerView: 3 },
-                768: { slidesPerView: 2.4 },
-                640: { slidesPerView: 2 }
-            }
-        });
-    });
+    // Wait for DOM ready
+    const initAll = () => {
+        // Small delay to ensure Vue components are mounted
+        setTimeout(() => {
+            // 3D swiper
+            initSwiper('.swiper-3d-container', {
+                modules: [Navigation, Autoplay, EffectCoverflow],
+                slidesPerView: 2,
+                spaceBetween: 20,
+                loop: true,
+                loopAdditionalSlides: 2,
+                centeredSlides: true,
+                speed: 1000,
+                effect: 'coverflow',
+                grabCursor: true,
+                autoplay: {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: true
+                },
+                coverflowEffect: {
+                    rotate: 1,
+                    stretch: 50,
+                    depth: 90,
+                    modifier: 1,
+                    slideShadows: false
+                },
+                navigation: {
+                    prevEl: '.swiper-3d-button-prev',
+                    nextEl: '.swiper-3d-button-next'
+                },
+                breakpoints: {
+                    640: {
+                        slidesPerView: 2,
+                        spaceBetween: 20
+                    },
+                    768: {
+                        slidesPerView: 2.4,
+                        spaceBetween: 24
+                    },
+                    1024: {
+                        slidesPerView: 3,
+                        spaceBetween: 24
+                    },
+                    1400: {
+                        slidesPerView: 4,
+                        spaceBetween: 30
+                    }
+                }
+            });
 
-    // Top player slider (raw fidelity config: auto all viewports, smoother loop)
-    initWhenReady('.swiper-top-player', () => {
-        new Swiper('.swiper-top-player', {
-            slidesPerView: 'auto',
-            loop: true,
-            centeredSlides: true,
-            spaceBetween: 24,
-            freeMode: true,
-            speed: 1000,
-            autoplay: { delay: 2000 },
-            navigation: {
-                prevEl: '.top-player-prev',
-                nextEl: '.top-player-next'
-            }
-            // No breakpoints: maintain auto across all screens
-        });
-    });
+            // Top player slider - simple grid with loop
+            const topPlayerSwiper = initSwiper('.swiper-top-player', {
+                modules: [Navigation, Autoplay],
+                slidesPerView: 1,
+                spaceBetween: 24,
+                loop: true,
+                loopAdditionalSlides: 2,
+                speed: 600,
+                grabCursor: true,
+                slideToClickedSlide: true,
+                centeredSlides: false,
+                autoplay: {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: true
+                },
+                navigation: {
+                    prevEl: '.top-player-prev',
+                    nextEl: '.top-player-next'
+                },
+                breakpoints: {
+                    320: {
+                        slidesPerView: 1,
+                        spaceBetween: 16
+                    },
+                    640: {
+                        slidesPerView: 2,
+                        spaceBetween: 20
+                    },
+                    768: {
+                        slidesPerView: 2,
+                        spaceBetween: 24
+                    },
+                    1024: {
+                        slidesPerView: 3,
+                        spaceBetween: 24
+                    },
+                    1440: {
+                        slidesPerView: 3,
+                        spaceBetween: 30
+                    }
+                },
+                on: {
+                    resize: function (this: Swiper) {
+                        console.log('[Swiper] Top Player Resized:', {
+                            width: this.width,
+                            slidesPerView: this.params.slidesPerView,
+                            slidesSizesGrid: this.slidesSizesGrid
+                        });
+                    }
+                }
+            });
 
-    // Game swiper 1
-    initWhenReady('.game-swiper', () => {
-        new Swiper('.game-swiper', {
-            slidesPerView: 1,
-            loop: true,
-            spaceBetween: 24,
-            speed: 1000,
-            freeMode: true,
-            autoplay: { delay: 2000 },
-            pagination: { el: '.game-swiper-pagination', clickable: true },
-            breakpoints: {
-                1200: { slidesPerView: 4 },
-                992: { slidesPerView: 3 },
-                575: { slidesPerView: 2 }
+            // Debug: Log container width after init
+            if (topPlayerSwiper) {
+                console.log(
+                    '[Swiper] Top Player Container Width:',
+                    document.querySelector('.swiper-top-player')?.clientWidth
+                );
             }
-        });
-    });
 
-    // Game swiper 2
-    initWhenReady('.game-swiper2', () => {
-        new Swiper('.game-swiper2', {
-            slidesPerView: 1,
-            loop: true,
-            spaceBetween: 24,
-            speed: 5000,
-            freeMode: true,
-            autoplay: { delay: 1 },
-            pagination: { el: '.game-swiper-pagination', clickable: true },
-            breakpoints: {
-                1400: { slidesPerView: 6 },
-                1024: { slidesPerView: 4 },
-                768: { slidesPerView: 3 },
-                575: { slidesPerView: 2 }
-            }
-        });
-    });
+            // Game swiper 1
+            initSwiper('.game-swiper', {
+                modules: [Autoplay, Pagination],
+                slidesPerView: 1,
+                spaceBetween: 24,
+                loop: true,
+                loopAdditionalSlides: 2,
+                speed: 1000,
+                grabCursor: true,
+                autoplay: {
+                    delay: 2500,
+                    disableOnInteraction: false
+                },
+                pagination: {
+                    el: '.game-swiper-pagination',
+                    clickable: true
+                },
+                breakpoints: {
+                    575: { slidesPerView: 2 },
+                    992: { slidesPerView: 3 },
+                    1200: { slidesPerView: 4 }
+                }
+            });
 
-    // Banner vertical swiper
-    initWhenReady('.banner-swiper', () => {
-        new Swiper('.banner-swiper', {
-            direction: 'vertical',
-            slidesPerView: 1,
-            spaceBetween: 30,
-            loop: true,
-            speed: 1000,
-            autoplay: { delay: 2000 },
-            pagination: { el: '.banner-swiper-pagination', clickable: true }
-        });
-    });
-};
+            // Game swiper 2 - continuous scroll
+            initSwiper('.game-swiper2', {
+                modules: [Autoplay, Pagination],
+                slidesPerView: 2,
+                spaceBetween: 24,
+                loop: true,
+                loopAdditionalSlides: 3,
+                speed: 3000,
+                grabCursor: true,
+                autoplay: {
+                    delay: 0,
+                    disableOnInteraction: false,
+                    reverseDirection: false
+                },
+                freeMode: true,
+                pagination: {
+                    el: '.game-swiper-pagination',
+                    clickable: true
+                },
+                breakpoints: {
+                    575: { slidesPerView: 2 },
+                    768: { slidesPerView: 3 },
+                    1024: { slidesPerView: 4 },
+                    1400: { slidesPerView: 6 }
+                }
+            });
+
+            // Banner vertical swiper
+            initSwiper('.banner-swiper', {
+                modules: [Autoplay, Pagination],
+                direction: 'vertical',
+                slidesPerView: 1,
+                spaceBetween: 30,
+                loop: true,
+                loopAdditionalSlides: 1,
+                speed: 1000,
+                autoplay: {
+                    delay: 2500,
+                    disableOnInteraction: false
+                },
+                pagination: {
+                    el: '.banner-swiper-pagination',
+                    clickable: true
+                }
+            });
+        }, 150); // Small delay for Vue mount
+    };
+
+    // Init on client mount
+    initAll();
+
+    // Cleanup on unmount
+    return {
+        provide: {
+            swipers
+        }
+    };
+});
