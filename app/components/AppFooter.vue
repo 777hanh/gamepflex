@@ -100,7 +100,7 @@
             </div>
         </div>
         <!-- footer banner img  -->
-        <div class="footer-banner-img" id="faa">
+        <div class="footer-banner-img z-[-1]" id="faa">
             <NuxtImg src="/assets/img/fbanner.png" alt="banner" class="w-100" />
         </div>
     </footer>

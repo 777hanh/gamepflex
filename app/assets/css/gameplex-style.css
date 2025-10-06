@@ -2121,6 +2121,7 @@ ul li {
     position: relative;
     background: rgb(var(--n0));
     border-radius: inherit;
+    padding-block: 64px;
 }
 .tournament-section .tournament-wrapper .tournament-wrapper-border::before,
 .tournament-section .tournament-wrapper .tournament-wrapper-border::after {
@@ -2135,6 +2136,7 @@ ul li {
     border-radius: inherit;
     -webkit-animation: spinBorder 20s linear infinite;
     animation: spinBorder 20s linear infinite;
+    padding-block: inherit;
 }
 .tournament-section .tournament-wrapper .tournament-wrapper-border::after {
     -webkit-animation: spinBorder 10s linear infinite;

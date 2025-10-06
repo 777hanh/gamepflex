@@ -1,186 +1,36 @@
 <template>
     <!-- tournament section start -->
-    <section class="tournament-section pb-120" id="tournament-hero">
-        <!-- Diamond animation -->
-        <div class="diamond-area">
-            <img class="w-100" src="/assets/img/diamond.png" alt="diamond" />
-        </div>
-        <!-- game console animation -->
-        <div class="game-console-area">
-            <img
-                class="w-100"
-                src="/assets/img/game-console2.png"
-                alt="game-console"
-            />
-        </div>
-        <div class="red-ball top-50"></div>
+    <section class="tournament-section" id="tournament-hero">
         <div class="tournament-wrapper">
             <div class="tournament-wrapper-border">
-                <div class="container pt-120 pb-120">
+                <div class="container">
                     <div
-                        class="row justify-content-between align-items-center gy-sm-0 gy-4 mb-15"
+                        class="mb-15 flex flex-wrap items-center justify-between gap-y-4 sm:gap-y-0"
                     >
-                        <div class="col-md-6 col-sm-8">
+                        <div class="w-full sm:w-2/3 md:w-1/2">
                             <h2
                                 class="display-four tcn-1 cursor-scale growUp title-anim"
                             >
                                 Tournaments
                             </h2>
                         </div>
-                        <div class="col-md-6 col-sm-4 text-sm-end">
+                        <div class="w-full sm:w-1/3 sm:text-end md:w-1/2">
                             <NuxtLink
                                 to="/tournaments"
-                                class="btn-half-border position-relative d-inline-block bgp-1 rounded-pill px-6 py-2"
+                                class="btn-half-border bgp-1 relative inline-block rounded-full px-6 py-2"
                             >
                                 View More
                             </NuxtLink>
                         </div>
                     </div>
                     <div
-                        class="row justify-content-between align-items-center g-6"
+                        class="-mx-3 flex flex-wrap items-center justify-between"
                     >
-                        <div
+                        <TournamentCard
                             v-for="tournament in tournaments"
                             :key="tournament.id"
-                            class="col-xl-4 col-md-6"
-                        >
-                            <div class="tournament-card p-xl-4 bgn-4 p-3">
-                                <div
-                                    class="tournament-img position-relative mb-8"
-                                >
-                                    <div class="img-area overflow-hidden">
-                                        <img
-                                            class="w-100"
-                                            :src="tournament.image"
-                                            alt="tournament"
-                                        />
-                                    </div>
-                                    <span
-                                        class="card-status position-absolute tcn-1 fs-sm start-0 px-6 py-2"
-                                    >
-                                        <span class="dot-icon alt-icon ps-3">{{
-                                            tournament.status
-                                        }}</span>
-                                    </span>
-                                </div>
-                                <div class="tournament-content px-xl-4 px-sm-2">
-                                    <div class="tournament-info mb-5">
-                                        <NuxtLink
-                                            :to="`/tournaments/${tournament.id}`"
-                                            class="d-block"
-                                        >
-                                            <h4
-                                                class="tournament-title tcn-1 cursor-scale growDown title-anim mb-1"
-                                            >
-                                                {{ tournament.name }}
-                                            </h4>
-                                        </NuxtLink>
-                                        <span class="tcn-6 fs-sm">{{
-                                            tournament.type
-                                        }}</span>
-                                    </div>
-                                    <div class="hr-line line3"></div>
-                                    <div
-                                        class="card-info d-flex align-items-center my-5 flex-wrap gap-3"
-                                    >
-                                        <div
-                                            class="price-money bgn-3 d-flex align-items-center h-100 gap-3 px-3 py-2"
-                                        >
-                                            <div
-                                                class="d-flex align-items-center gap-2"
-                                            >
-                                                <img
-                                                    class="w-100"
-                                                    src="/assets/img/bitcoin.png"
-                                                    alt="bitcoin"
-                                                />
-                                                <span class="tcn-1 fs-sm">{{
-                                                    tournament.bitcoinAmount
-                                                }}</span>
-                                            </div>
-                                            <div class="v-line"></div>
-                                            <div
-                                                class="d-flex align-items-center gap-2"
-                                            >
-                                                <img
-                                                    class="w-100"
-                                                    src="/assets/img/tether.png"
-                                                    alt="tether"
-                                                />
-                                                <span class="tcn-1 fs-sm"
-                                                    >${{
-                                                        tournament.prizePool
-                                                    }}</span
-                                                >
-                                            </div>
-                                        </div>
-                                        <div
-                                            class="ticket-fee bgn-3 d-flex align-items-center h-100 gap-1 px-3 py-2"
-                                        >
-                                            <i
-                                                class="ti ti-ticket fs-base tcp-2"
-                                            ></i>
-                                            <span class="tcn-1 fs-sm">{{
-                                                tournament.entryFee
-                                            }}</span>
-                                        </div>
-                                        <div
-                                            class="date-time bgn-3 d-flex align-items-center h-100 gap-1 px-3 py-2"
-                                        >
-                                            <i
-                                                class="ti ti-calendar fs-base tcn-1"
-                                            ></i>
-                                            <span class="tcn-1 fs-sm">{{
-                                                tournament.date
-                                            }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="hr-line line3"></div>
-                                    <div class="card-more-info d-between mt-6">
-                                        <div
-                                            class="teams-info d-between gap-xl-5 gap-3"
-                                        >
-                                            <div
-                                                class="teams d-flex align-items-center gap-1"
-                                            >
-                                                <i
-                                                    class="ti ti-users fs-base"
-                                                ></i>
-                                                <span class="tcn-6 fs-sm"
-                                                    >{{
-                                                        tournament.currentTeams
-                                                    }}/{{
-                                                        tournament.maxTeams
-                                                    }}
-                                                    Teams</span
-                                                >
-                                            </div>
-                                            <div
-                                                class="player d-flex align-items-center gap-1"
-                                            >
-                                                <i
-                                                    class="ti ti-user fs-base"
-                                                ></i>
-                                                <span class="tcn-6 fs-sm"
-                                                    >{{
-                                                        tournament.players
-                                                    }}
-                                                    Players</span
-                                                >
-                                            </div>
-                                        </div>
-                                        <NuxtLink
-                                            :to="`/tournaments/${tournament.id}`"
-                                            class="btn2"
-                                        >
-                                            <i
-                                                class="ti ti-arrow-right fs-2xl"
-                                            ></i>
-                                        </NuxtLink>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            :tournament="tournament"
+                        />
                     </div>
                 </div>
             </div>
@@ -190,29 +40,8 @@
 </template>
 
 <script setup lang="ts">
-    // Clone from index_source.html tournament section - exact structure
-    export interface TournamentData {
-        id: number;
-        name: string;
-        type: string;
-        image: string;
-        status: string;
-        bitcoinAmount: number;
-        prizePool: string;
-        entryFee: string;
-        date: string;
-        currentTeams: number;
-        maxTeams: number;
-        players: number;
-    }
+    import type { TournamentData } from './TournamentCard.vue';
+    import TournamentCard from './TournamentCard.vue';
 
     defineProps<{ tournaments: TournamentData[] }>();
 </script>
-
-<style scoped>
-    /* Ensure tournament images fit properly - matching source template */
-    .tournament-img .img-area img {
-        object-fit: cover;
-        width: 100%;
-    }
-</style>

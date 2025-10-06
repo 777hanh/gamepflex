@@ -24,6 +24,7 @@
     "axios": "^1.12.2",
     "eslint": "^9.36.0",
     "gsap": "^3.13.0",
+    "lucide-vue-next": "^0.544.0",
     "magnific-popup": "^1.2.0",
     "nuxt": "^4.1.1",
     "pinia": "^3.0.3",
