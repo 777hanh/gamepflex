@@ -6,35 +6,25 @@ export default defineNuxtPlugin(() => {
     const cursor = document.querySelector<HTMLElement>('.cursor');
     if (!cursor) return;
 
-    // GPU acceleration for sharp rendering at all scales
-    cursor.style.willChange = 'transform';
-    cursor.style.backfaceVisibility = 'hidden';
-    cursor.style.webkitBackfaceVisibility = 'hidden';
-    cursor.style.perspective = '1000px';
-
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
-
-    // Use transform for better performance and sharpness
     let paused = false;
-    let currentScale = 1;
 
+    // Simple positioning using left/top (margin handles centering)
     const loop = () => {
         if (!paused) {
-            // Use translate3d with centered offset for sharp rendering
-            // Separate translate and scale for better rendering quality
-            cursor.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%) translateZ(0) scale(${currentScale})`;
+            cursor.style.left = `${mouseX}px`;
+            cursor.style.top = `${mouseY}px`;
         }
         requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
 
-    const moveHandler = (e: MouseEvent | PointerEvent) => {
+    const moveHandler = (e: MouseEvent) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
     };
     window.addEventListener('mousemove', moveHandler, { passive: true });
-    window.addEventListener('pointermove', moveHandler, { passive: true });
 
     const BIG = 'big-cursor';
     const SMALL = 'small-cursor';
@@ -47,25 +37,20 @@ export default defineNuxtPlugin(() => {
     const applyFor = (el: Element) => {
         if (!el.classList.contains('cursor-scale')) return;
         resetClasses();
-        // Apply scale classes for sharp rendering
+        // CSS classes handle transform: scale() - see gameplex-style.css
         if (el.classList.contains('growUp')) {
-            cursor.classList.add(BIG);
-            currentScale = 7;
+            cursor.classList.add(BIG); // scale(7) = 280px
         } else if (el.classList.contains('growDown')) {
-            cursor.classList.add(SMALL);
-            currentScale = 4;
+            cursor.classList.add(SMALL); // scale(4) = 160px
         } else if (el.classList.contains('growDown2')) {
-            cursor.classList.add(SMALL2);
-            currentScale = 2;
+            cursor.classList.add(SMALL2); // scale(2) = 80px
         }
+        // else: no class = no scale = 40px default
     };
 
     const resetClassesWithScale = () => {
         resetClasses();
-        currentScale = 1;
-    };
-
-    // Delegate events instead of binding to every element (better for dynamic content)
+    }; // Delegate events instead of binding to every element (better for dynamic content)
     document.addEventListener('mouseover', (e) => {
         const target = e.target as HTMLElement | null;
         if (!target) return;

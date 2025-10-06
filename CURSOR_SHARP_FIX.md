@@ -1,13 +1,32 @@
-# 🎯 Cursor Effect - Sharp Rendering Fix
+# 🎯 Cursor Pixelation Fix - Back to Basics
 
-## Problem
+## Date: October 6, 2025
 
-Khi cursor hover vào elements với hiệu ứng grow (scale lên 7x), vòng tròn cursor
-bị mất độ sắc nét/HD, trở nên blur và pixelated.
+### Problem: Cursor vẫn pixelated dù đã tăng base size
 
-### Root Cause
+**Previous attempts**:
 
-- Cursor ban đầu: 40px × 40px
+- ❌ Tăng base size 40px → 60px
+- ❌ Giảm scale ratio 7x → 4.67x
+- ❌ Thêm GPU acceleration (translateZ, backface-visibility, will-change)
+- ❌ Thêm anti-aliasing tricks (image-rendering, filter: contrast)
+
+**Result**: Vẫn còn blurry/pixelated khi scale lớn ❌
+
+---
+
+## 🔍 Root Cause Discovery
+
+### Checked Original Template (`index_source.html` + `assets12/css/gameplex-style.css`)
+
+````css
+/* ORIGINAL TEMPLATE - SIMPLE & SHARP */
+.cursor {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;  /* ← Center with margin, not translate! */
+  margin-top: -20px;   /* ← This is the key! */
 - Scale lên 7x = 280px × 280px
 - Browser scale ảnh raster → blur/pixelated
 - Sử dụng `left/top` positioning → không GPU accelerated
@@ -31,7 +50,7 @@ bị mất độ sắc nét/HD, trở nên blur và pixelated.
 .big-cursor {
     transform: scale(7); /* Blur! */
 }
-```
+````
 
 #### After
 

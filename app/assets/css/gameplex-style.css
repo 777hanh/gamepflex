@@ -1169,26 +1169,16 @@ ul li {
 
 .cursor {
     position: fixed;
-    top: 0;
-    left: 0;
     width: 40px;
     height: 40px;
     border-radius: 50%;
     border: 2px solid rgba(var(--n1), 0.8);
-    /* Use transform for centering instead of margin */
-    transform: translate(-50%, -50%) translateZ(0) scale(1);
-    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    margin-left: -20px;
+    margin-top: -20px;
+    transition: transform 0.3s;
     pointer-events: none;
     transform-origin: center center;
     z-index: 1000;
-    /* GPU acceleration & anti-aliasing for sharp scaling */
-    will-change: transform;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    -webkit-font-smoothing: subpixel-antialiased;
-    /* High quality rendering */
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
 }
 @media (max-width: 991px) {
     .cursor {
@@ -1199,13 +1189,17 @@ ul li {
 .big-cursor,
 .small-cursor,
 .small-cursor2 {
-    /* Scale will be applied via JS with translate for sharp rendering */
+    transform: scale(7);
     background: rgb(var(--n1));
     mix-blend-mode: difference;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    /* Smooth scaling transition */
-    transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.small-cursor {
+    transform: scale(4);
+}
+
+.small-cursor2 {
+    transform: scale(2);
 }
 
 /* Scale values handled in JS for precise control */

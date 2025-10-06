@@ -1,13 +1,13 @@
 <template>
     <div>
-        <!-- <HeroSection id="hero" /> -->
+        <HeroSection id="hero" />
         <!-- Raw cloned 3D swiper (phase 2 verification) -->
-        <!-- <Swiper3DRaw /> -->
+        <Swiper3DRaw />
+        <!-- Raw cloned Top Players (phase 2 verification) -->
+        <TopPlayersRaw />
+        <LiveTournaments id="tournaments" :tournaments="liveTournaments" />
         <!-- <FeaturedGames id="featured-games" :games="featuredGames" /> -->
         <!-- <HomeNetflixCarousel id="netflix-carousel" /> -->
-        <!-- Raw cloned Top Players (phase 2 verification) -->
-        <!-- <TopPlayersRaw /> -->
-        <!-- <LiveTournaments id="tournaments" :tournaments="liveTournaments" /> -->
         <!-- <GamesCarousel id="games-carousel" :games="featuredGames" /> -->
         <!-- <TopTeams id="top-teams" :teams="topTeams" /> -->
         <!-- <CallToAction id="cta" /> -->
@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-    import { useInteractiveEffects } from '../composables/useInteractiveEffects';
+    // import { useInteractiveEffects } from '../composables/useInteractiveEffects';
     import { useHomeData } from '../composables/useHomeData';
     import HeroSection from '../components/home/HeroSection.vue';
     import FeaturedGames from '../components/home/FeaturedGames.vue';
@@ -41,7 +41,7 @@
 
     const { featuredGames, liveTournaments, topTeams } = useHomeData();
 
-    useInteractiveEffects();
+    // useInteractiveEffects();
 </script>
 
 <style scoped></style>
