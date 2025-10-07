@@ -7,12 +7,12 @@ import {
     Pagination
 } from 'swiper/modules';
 
-export default defineNuxtPlugin(() => {
+export default defineNuxtPlugin((nuxtApp) => {
     if (!import.meta.client) return;
 
     const swipers = new Map<string, Swiper>();
 
-    const initSwiper = (selector: string, options: any) => {
+    const initSwiper = (selector: string, options: any, retryCount = 0) => {
         if (swipers.has(selector)) {
             console.log(`[Swiper] Already initialized: ${selector}`);
             return;
@@ -20,7 +20,19 @@ export default defineNuxtPlugin(() => {
 
         const el = document.querySelector(selector);
         if (!el) {
-            console.warn(`[Swiper] Element not found: ${selector}`);
+            if (retryCount < 5) {
+                console.warn(
+                    `[Swiper] Element not found: ${selector}, retrying... (${retryCount + 1}/5)`
+                );
+                setTimeout(
+                    () => initSwiper(selector, options, retryCount + 1),
+                    300
+                );
+                return null;
+            }
+            console.error(
+                `[Swiper] Element not found after 5 retries: ${selector}`
+            );
             return null;
         }
 
@@ -70,6 +82,8 @@ export default defineNuxtPlugin(() => {
 
     // Wait for DOM ready
     const initAll = () => {
+        console.log('[Swiper] Starting initialization...');
+
         // Small delay to ensure Vue components are mounted
         setTimeout(() => {
             // 3D swiper
@@ -252,8 +266,11 @@ export default defineNuxtPlugin(() => {
         }, 150); // Small delay for Vue mount
     };
 
-    // Init on client mount
-    initAll();
+    // Init on Nuxt app mounted - ensures Vue components are ready
+    nuxtApp.hook('app:mounted', () => {
+        console.log('[Swiper] App mounted, starting initialization...');
+        initAll();
+    });
 
     // Cleanup on unmount
     return {

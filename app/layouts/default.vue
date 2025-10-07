@@ -12,9 +12,9 @@
                 :is-open="isNotificationOpen"
                 @close="closeNotification"
             />
-            <!-- custom cursor element -->
-            <div class="cursor" aria-hidden="true"></div>
         </div>
+        <!-- custom cursor element - MUST be outside v-else for plugins to find it -->
+        <div class="cursor" aria-hidden="true"></div>
     </div>
 </template>
 
