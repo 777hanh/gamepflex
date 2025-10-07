@@ -16,10 +16,10 @@ export default defineNuxtConfig({
     ],
     css: [
         // OPTIMIZED: Load in priority order
-        '~/assets/css/main.css',
-        '~/assets/css/gameplex-utilities.css',
+        'aos/dist/aos.css',
         '~/assets/css/gameplex-style.css',
-        'aos/dist/aos.css'
+        '~/assets/css/gameplex-utilities.css',
+        '~/assets/css/main.css'
     ],
     components: {
         dirs: [

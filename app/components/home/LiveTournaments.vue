@@ -16,8 +16,8 @@
                         </div>
                         <div class="w-full sm:w-1/3 sm:text-end md:w-1/2">
                             <NuxtLink
-                                to="/tournaments"
-                                class="btn-half-border bgp-1 relative inline-block rounded-full px-6 py-2"
+                                :to="routes.tournaments"
+                                class="btn-half-border bg-primary relative inline-block rounded-full px-6 py-2"
                             >
                                 View More
                             </NuxtLink>
@@ -40,6 +40,7 @@
 </template>
 
 <script setup lang="ts">
+    import { routes } from '~/constants';
     import type { TournamentData } from './TournamentCard.vue';
     import TournamentCard from './TournamentCard.vue';
 

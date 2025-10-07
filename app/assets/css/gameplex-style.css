@@ -1703,14 +1703,14 @@ ul li {
     bottom: 100%;
     left: -100%;
     max-width: 300px;
-    width: 100%;
+    height: 100%;
     scale: 2;
     opacity: 0.5;
     z-index: -1;
 }
 @media (max-width: 767px) {
     .footer-banner-img {
-        display: none;
+        display: none !important;
     }
 }
 
@@ -2527,7 +2527,8 @@ ul li {
     transition: all 0.5s ease;
     transform: translateX(-20px);
 }
-.footer .footer-list li .footer-link i {
+.footer .footer-list li .footer-link i,
+.footer .footer-list li .footer-link svg {
     transition: all 0.5s ease;
     opacity: 0;
 }
@@ -2535,7 +2536,8 @@ ul li {
     color: rgb(var(--p1));
     transform: translateX(0px);
 }
-.footer .footer-list li .footer-link:hover i {
+.footer .footer-list li .footer-link:hover i,
+.footer .footer-list li .footer-link:hover svg {
     transform: translateX(0px);
     opacity: 1;
 }

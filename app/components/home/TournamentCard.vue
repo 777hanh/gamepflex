@@ -92,7 +92,7 @@
                     </div>
                     <NuxtLink
                         :to="`/tournaments/${tournament.id}`"
-                        class="btn2"
+                        class="btn2 bg-primary/30! hover:bg-primary!"
                     >
                         <ArrowRight class="fs-2xl" />
                     </NuxtLink>

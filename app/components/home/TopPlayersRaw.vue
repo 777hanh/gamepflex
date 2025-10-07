@@ -98,7 +98,7 @@
                                                 Score
                                             </h6>
                                             <ul
-                                                class="d-flex align-items-center tcp-2 gap-1"
+                                                class="d-flex align-items-center text-primary gap-1"
                                             >
                                                 <li
                                                     v-for="n in player.stars
