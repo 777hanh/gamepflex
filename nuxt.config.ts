@@ -21,6 +21,15 @@ export default defineNuxtConfig({
         '~/assets/css/gameplex-style.css',
         'aos/dist/aos.css'
     ],
+    components: {
+        dirs: [
+            {
+                path: '~/components',
+                extensions: ['vue'],
+                pathPrefix: false
+            }
+        ]
+    },
     app: {
         head: {
             title: "GamePlex - Ultimate Gamer's Haven",
@@ -67,7 +76,7 @@ export default defineNuxtConfig({
             apiBase: process.env.API_BASE_URL || 'https://api.gameplex.com'
         }
     },
-    ssr: false,
+    ssr: process.env.SSR_MODE !== 'false', // Default to true if not set
     nitro: {
         preset: 'vercel'
     },

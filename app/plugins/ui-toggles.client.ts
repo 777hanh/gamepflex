@@ -1,6 +1,6 @@
 // Navbar/search/profile/wallet/notification/chat list toggle logic cloned from original jQuery version
 // Phase 1 keeps jQuery style selectors but re-written vanilla for lighter dependency usage later
-export default () => {
+export default defineNuxtPlugin(() => {
     if (typeof window === 'undefined') return;
 
     const on = (sel: string, evt: string, fn: (e: Event) => void) => {
@@ -91,4 +91,4 @@ export default () => {
         if (outside('.chat-list-area', '.chat-list-toggle-btn'))
             document.querySelector('.chat-list-area')?.classList.remove('open');
     });
-};
+});

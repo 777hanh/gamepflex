@@ -1,13 +1,13 @@
 // Earning chart init (lazy dynamic import) if #earning-chart exists
-export default async () => {
+export default defineNuxtPlugin(async () => {
     if (typeof window === 'undefined') return;
     const el = document.querySelector('#earning-chart');
     if (!el) return;
-    const { default: ApexCharts } = await import('apexcharts').catch(() => ({
-        default: null as unknown
-    }));
+    const { default: ApexCharts } = (await import('apexcharts').catch(() => ({
+        default: null
+    }))) as { default: typeof import('apexcharts') };
     // If library missing, skip silently (phase 1 setup)
-    if (typeof ApexCharts !== 'function') return;
+    if (!ApexCharts) return;
     const options: any = {
         colors: ['#F62F1A', '#F6471C'],
         tooltip: {
@@ -56,4 +56,4 @@ export default async () => {
     } catch {
         /* silent */
     }
-};
+});

@@ -1,5 +1,5 @@
 // Countdown timer replicate (#days,#hours,#minutes,#seconds)
-export default () => {
+export default defineNuxtPlugin(() => {
     if (typeof window === 'undefined') return;
     const second = 1000,
         minute = second * 60,
@@ -28,4 +28,4 @@ export default () => {
         requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
-};
+});

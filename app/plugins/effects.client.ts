@@ -2,7 +2,7 @@
 // Supports two modes:
 //  A (center mode): add attribute data-ripple-center
 //  B (follow pointer): default behavior
-export default () => {
+export default defineNuxtPlugin(() => {
     if (typeof window === 'undefined') return;
 
     const applyRipple = (el: HTMLElement, e?: MouseEvent) => {
@@ -40,4 +40,4 @@ export default () => {
     document.querySelectorAll('.currentYear').forEach((el) => {
         el.textContent = String(new Date().getFullYear());
     });
-};
+});
