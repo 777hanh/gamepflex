@@ -1,5 +1,5 @@
 // Preloader hide after delay - OPTIMIZED for faster load
-export default () => {
+export default defineNuxtPlugin(() => {
     if (typeof window === 'undefined') return;
 
     const hidePreloader = () => {
@@ -21,4 +21,4 @@ export default () => {
     } else {
         setTimeout(hidePreloader, 100);
     }
-};
+});

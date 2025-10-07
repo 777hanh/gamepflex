@@ -1,11 +1,12 @@
 <template>
-    <div>
+    <div class="flex flex-col gap-12 md:gap-16 lg:gap-20">
         <HeroSection id="hero" />
         <!-- Raw cloned 3D swiper (phase 2 verification) -->
         <Swiper3DRaw />
         <!-- Raw cloned Top Players (phase 2 verification) -->
         <TopPlayersRaw />
         <LiveTournaments id="tournaments" :tournaments="liveTournaments" />
+        <NextLevelGaming />
         <!-- <FeaturedGames id="featured-games" :games="featuredGames" /> -->
         <!-- <HomeNetflixCarousel id="netflix-carousel" /> -->
         <!-- <GamesCarousel id="games-carousel" :games="featuredGames" /> -->
@@ -26,6 +27,7 @@
     import TopPlayersRaw from '../components/home/TopPlayersRaw.vue';
     import GamesCarousel from '../components/home/GamesCarousel.vue';
     import HomeNetflixCarousel from '~/components/home/NetflixCarousel.vue';
+    import NextLevelGaming from '~/components/home/NextLevelGaming';
     import Swiper3DRaw from '~/components/home/Swiper3DRaw.vue';
 
     useHead({

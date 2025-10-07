@@ -15,6 +15,10 @@
 @import 'tailwindcss';
 @import '@nuxt/ui';
 
+:root {
+    --n2: 240, 240, 240; /* Light Gray */
+}
+
 /* Animated border utility for highlight cards */
 .animated-border {
     position: relative;
@@ -74,4 +78,9 @@
     -khtml-user-drag: none;
     -moz-user-drag: none;
     -o-user-drag: none;
+}
+
+@theme {
+    --color-primary: rgb(var(--p1));
+    --color-secondary: rgb(var(--n2));
 }

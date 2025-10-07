@@ -94,13 +94,15 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-    background: rgb(var(--p2));
+    /* background: rgb(var(--p2)); */
+	background: rgba(0, 0, 0, 0.2);
     border-radius: 5px;
 }
 
 ::-webkit-scrollbar-button,
 ::-webkit-scrollbar-thumb {
-    background: rgb(var(--p1));
+    /* background: rgb(var(--p1)); */
+	background: rgba(0, 0, 0, 0.2);
     border-radius: 5px;
 }
 

@@ -1,6 +1,6 @@
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
-    devtools: { enabled: false }, // OPTIMIZED: Disable in production
+    devtools: { enabled: true }, // OPTIMIZED: Disable in production
     future: {
         compatibilityVersion: 4
     },
@@ -67,7 +67,7 @@ export default defineNuxtConfig({
             apiBase: process.env.API_BASE_URL || 'https://api.gameplex.com'
         }
     },
-    ssr: true,
+    ssr: false,
     nitro: {
         preset: 'vercel'
     },
