@@ -3,7 +3,7 @@
     <section class="swiper-3d-section position-relative z-1" id="swiper-3d">
         <div class="container">
             <div class="swiper swiper-3d-container">
-                <div class="swiper-wrapper">
+                <div class="swiper-wrapper pb-[.5px]">
                     <!-- Slides (static clone from original index_source.html) -->
                     <div
                         v-for="(slide, i) in slides"

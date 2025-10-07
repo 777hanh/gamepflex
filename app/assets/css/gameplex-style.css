@@ -1969,7 +1969,7 @@ ul li {
     background: rgba(var(--n3), 0.4);
 }
 .swiper-3d-section .swiper-3d-container .swiper-slide-active .card-3d {
-    border: 1px solid rgb(var(--p1));
+    border: 2px solid rgb(var(--p1));
 }
 .swiper-3d-section .swiper-btn-area .swiper-3d-button-prev,
 .swiper-3d-section .swiper-btn-area .swiper-3d-button-next {
