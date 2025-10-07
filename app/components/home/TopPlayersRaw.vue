@@ -6,7 +6,7 @@
             <img class="w-80" src="assets/img/sword.png" alt="sword" />
         </div>
         <div class="red-ball end-0"></div>
-        <div class="container">
+        <div class="container overflow-hidden">
             <div class="row justify-content-between mb-15">
                 <div class="col-sm-6">
                     <h2

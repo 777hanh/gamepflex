@@ -10,8 +10,8 @@
                     class="br footer-card-area pt-10 sm:pt-15 lg:col-span-1 lg:py-20"
                     data-footer-col
                 >
-                    <div class="lg:py-10">
-                        <div class="footer-logo mb-8">
+                    <div class="flex h-full flex-col justify-center lg:py-10">
+                        <div class="mb-4 flex flex-col justify-center md:mb-8">
                             <NuxtLink
                                 :to="routes.home"
                                 class="flex items-center gap-6"
@@ -53,12 +53,12 @@
                     v-for="(column, index) in listMenuFooter"
                     :key="column.title"
                     :class="[
-                        'py-lg-20 pt-sm-15 footer-card-area pt-10 sm:col-span-1 lg:col-span-1',
+                        'footer-card-area pt-10 sm:col-span-1 sm:pt-15 lg:col-span-1 lg:py-20',
                         { 'br br-res': index === 0, br: index === 1 }
                     ]"
                     data-footer-col
                 >
-                    <div class="py-lg-10">
+                    <div class="lg:py-10">
                         <h4
                             class="footer-title title-anim drag-none mb-8 select-none"
                         >
@@ -103,7 +103,7 @@
                 <div class="lg:col-span-1">
                     <ul class="flex items-center gap-4 sm:gap-6 lg:gap-10">
                         <li v-for="legal in legalLinks" :key="legal.to">
-                            <NuxtLink :to="legal.to">{{
+                            <NuxtLink :to="legal.to" class="text-underline">{{
                                 legal.title
                             }}</NuxtLink>
                         </li>
@@ -201,5 +201,32 @@
     /* Ensure footer banner is not clipped */
     .footer-banner-img {
         overflow: visible !important;
+    }
+</style>
+
+<style scoped lang="css">
+    .text-underline {
+        position: relative;
+        display: inline-block;
+        width: fit-content;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -4px;
+            display: flex;
+            margin-right: 0.5rem;
+            transition: transform 0.3s ease;
+            width: 100%;
+            height: 1.5px;
+            background-color: var(--color-primary);
+            transform: scaleX(0);
+            transform-origin: left center;
+        }
+
+        &:hover::before {
+            transform: scaleX(1);
+        }
     }
 </style>
