@@ -5,7 +5,7 @@
 <template>
     <div class="container flex flex-col gap-8">
         <h2
-            class="grownUp display-five cursor-scale growUp title-anim flex! flex-col items-start"
+            class="grownUp display-four cursor-scale growUp title-anim flex! flex-col items-start"
         >
             <span>Game to</span><span>The Next Level</span>
         </h2>
