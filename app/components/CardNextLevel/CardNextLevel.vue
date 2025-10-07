@@ -31,7 +31,7 @@
             <component :is="props.icon" class="fs-lg h-5 w-5" />
         </div>
         <h3
-            class="text-secondary group-hover:text-primary mb-2 text-xl! font-semibold transition-colors duration-500 md:text-2xl!"
+            class="cursor-scale growDown2 text-secondary group-hover:text-primary mb-2 text-xl! font-semibold transition-colors duration-500 md:text-2xl!"
         >
             {{ props.title }}
         </h3>
