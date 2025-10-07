@@ -1,4 +1,4 @@
-import jQuery from 'jQuery';
+import jQuery from 'jquery';
 // Rely on Nuxt global type for defineNuxtPlugin (ambient)
 
 // Expose globally for legacy scripts (phase 1 migration)
