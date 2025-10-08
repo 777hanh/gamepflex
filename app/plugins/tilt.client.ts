@@ -2,7 +2,7 @@
 // Using official VanillaTilt library with exact same config as static HTML
 import VanillaTilt from 'vanilla-tilt';
 
-export default defineNuxtPlugin(() => {
+export default defineNuxtPlugin((nuxtApp) => {
     if (!import.meta.client) return;
 
     const initTilt = () => {
@@ -42,7 +42,13 @@ export default defineNuxtPlugin(() => {
     }
 
     // Re-init sau route change - OPTIMIZED
-    const nuxtApp = useNuxtApp();
+    nuxtApp.hook('app:mounted', () => {
+        console.log('[Cursor] App mounted, starting initialization...');
+        // Small delay to ensure Vue finished rendering
+        setTimeout(initTilt, 100);
+    });
+
+    // Wait for Nuxt app fully mounted
     nuxtApp.hook('page:finish', () => {
         setTimeout(initTilt, 100);
     });

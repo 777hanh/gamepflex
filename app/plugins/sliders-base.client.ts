@@ -269,7 +269,13 @@ export default defineNuxtPlugin((nuxtApp) => {
     // Init on Nuxt app mounted - ensures Vue components are ready
     nuxtApp.hook('app:mounted', () => {
         console.log('[Swiper] App mounted, starting initialization...');
-        initAll();
+        // Small delay to ensure Vue finished rendering
+        setTimeout(initAll, 100);
+    });
+
+    // Wait for Nuxt app fully mounted
+    nuxtApp.hook('page:finish', () => {
+        setTimeout(initAll, 100);
     });
 
     // Cleanup on unmount
